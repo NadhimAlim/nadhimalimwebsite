@@ -16,8 +16,9 @@ class HomeController extends Controller
         $projects = Project::latest()->paginate(4)->fragment('karya');
 
         $cvPath = PortfolioSetting::where('key', 'cv_path')->value('value');
+        $profilePhoto = PortfolioSetting::where('key', 'profile_photo')->value('value');
 
-        return view('landing', compact('services', 'projects', 'cvPath'));
+        return view('landing', compact('services', 'projects', 'cvPath', 'profilePhoto'));
     }
 
     public function contact(Request $request)

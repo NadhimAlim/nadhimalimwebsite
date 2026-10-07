@@ -100,6 +100,11 @@
             </div>
         </section>
 
+        <section class="admin-panel dashboard-panel cv-admin-panel">
+            <div class="panel-heading"><div><span class="panel-kicker">IDENTITAS PORTOFOLIO</span><h2>Foto profil</h2><p>Foto ini akan menggantikan ilustrasi pada halaman utama.</p></div><span class="cv-state {{ $profilePhoto ? 'ready' : '' }}"><i class="bi bi-circle-fill"></i> {{ $profilePhoto ? 'Sudah diunggah' : 'Belum diunggah' }}</span></div>
+            <form action="{{ route('admin.profile-photo.upload') }}" method="POST" enctype="multipart/form-data" class="cv-upload-form">@csrf<label class="cv-file-input"><i class="bi bi-person-bounding-box"></i><span><strong>Pilih foto profil</strong><small>JPG, PNG, atau WebP · maksimal 5 MB.</small></span><input type="file" name="photo" accept="image/jpeg,image/png,image/webp" required></label><button class="admin-button" type="submit"><i class="bi bi-cloud-arrow-up"></i> {{ $profilePhoto ? 'Perbarui foto' : 'Unggah foto' }}</button></form>
+        </section>
+
         <section class="admin-panel dashboard-panel cv-admin-panel" id="cv-panel">
             <div class="panel-heading"><div><span class="panel-kicker">DOKUMEN PROFESIONAL</span><h2>CV Anda</h2><p>PDF ini tersedia untuk diunduh dari halaman portofolio.</p></div><span class="cv-state {{ $cvPath ? 'ready' : '' }}"><i class="bi bi-circle-fill"></i> {{ $cvPath ? 'Sudah diunggah' : 'Belum diunggah' }}</span></div>
             <form action="{{ route('admin.cv.upload') }}" method="POST" enctype="multipart/form-data" class="cv-upload-form">@csrf<label class="cv-file-input"><i class="bi bi-file-earmark-pdf"></i><span><strong>Pilih file CV dalam format PDF</strong><small>Ukuran maksimal 10 MB. Unggahan baru menggantikan file lama.</small></span><input type="file" name="cv" accept="application/pdf,.pdf" required></label><button class="admin-button" type="submit"><i class="bi bi-cloud-arrow-up"></i> {{ $cvPath ? 'Perbarui CV' : 'Unggah CV' }}</button></form>

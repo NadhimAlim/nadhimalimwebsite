@@ -1,0 +1,1 @@
+.portrait-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 24%;z-index:0}.portrait-card.has-profile-photo:before,.portrait-card.has-profile-photo:after{display:none}.portrait-card.has-profile-photo .portrait-caption{z-index:1;background:#f7f8f0e8}

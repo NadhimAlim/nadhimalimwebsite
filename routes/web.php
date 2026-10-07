@@ -19,5 +19,6 @@ Route::middleware('portfolio.admin')->prefix('admin')->name('admin.')->group(fun
     Route::put('/services/{service}', [AdminController::class, 'updateService'])->name('services.update');
     Route::delete('/services/{service}', [AdminController::class, 'deleteService'])->name('services.delete');
     Route::post('/cv', [AdminController::class, 'uploadCv'])->name('cv.upload');
+    Route::post('/profile-photo', [AdminController::class, 'uploadProfilePhoto'])->name('profile-photo.upload');
     Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
 });

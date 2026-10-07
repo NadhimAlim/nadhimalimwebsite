@@ -50,6 +50,7 @@ class AdminController extends Controller
             'projects' => Project::latest()->get(),
             'services' => Service::orderBy('id')->get(),
             'cvPath' => PortfolioSetting::where('key', 'cv_path')->value('value'),
+            'profilePhoto' => PortfolioSetting::where('key', 'profile_photo')->value('value'),
         ]);
     }
 
@@ -125,6 +126,20 @@ class AdminController extends Controller
         }
 
         return back()->with('success', 'File CV berhasil diperbarui.');
+    }
+
+    public function uploadProfilePhoto(Request $request)
+    {
+        $request->validate(['photo' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120']);
+        $previous = PortfolioSetting::where('key', 'profile_photo')->value('value');
+        $path = $request->file('photo')->store('profile', 'public');
+        PortfolioSetting::updateOrCreate(['key' => 'profile_photo'], ['value' => $path]);
+
+        if ($previous) {
+            Storage::disk('public')->delete($previous);
+        }
+
+        return back()->with('success', 'Foto profil berhasil diperbarui.');
     }
 
     public function logout(Request $request)
