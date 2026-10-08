@@ -13,6 +13,7 @@ use App\Models\WorkTask;
 use App\Models\ProjectPayment;
 use App\Models\MarketplaceProduct;
 use App\Models\MarketplaceOrder;
+use App\Models\MarketplaceOrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -81,7 +82,13 @@ class AdminController extends Controller
             'workTasks' => WorkTask::with('payments')->orderBy('scheduled_at')->get(),
             'midtransConfigured' => filled(config('services.midtrans.server_key')) && filled(config('services.midtrans.client_key')),
             'marketplaceProducts' => MarketplaceProduct::orderBy('sort_order')->orderByDesc('created_at')->get(),
-            'marketplaceOrders' => MarketplaceOrder::latest()->get(),
+            'marketplaceOrders' => MarketplaceOrder::with('items')->latest()->get(),
+            'marketplaceShippingZones' => collect(json_decode(PortfolioSetting::where('key', 'marketplace_shipping_zones')->value('value') ?: '{}', true) ?: [])->map(fn ($fee, $zone) => $zone . ' | ' . $fee)->implode("\n"),
+            'marketplaceShippingFeeConfigured' => !empty(json_decode(PortfolioSetting::where('key', 'marketplace_shipping_zones')->value('value') ?: '{}', true)),
+            'marketplaceBankName' => PortfolioSetting::where('key', 'marketplace_bank_name')->value('value'),
+            'marketplaceBankAccount' => PortfolioSetting::where('key', 'marketplace_bank_account')->value('value'),
+            'marketplaceBankHolder' => PortfolioSetting::where('key', 'marketplace_bank_holder')->value('value'),
+            'marketplaceQrisImage' => PortfolioSetting::where('key', 'marketplace_qris_image')->value('value'),
             'upcomingTaskCount' => WorkTask::where('status', '!=', 'done')->where('scheduled_at', '>=', now())->count(),
             'overdueDeadlineCount' => WorkTask::where('status', '!=', 'done')->whereNotNull('deadline_at')->where('deadline_at', '<', now())->count(),
             'nearDeadlineCount' => WorkTask::where('status', '!=', 'done')->whereBetween('deadline_at', [now(), now()->copy()->addDays(3)])->count(),
@@ -199,7 +206,7 @@ class AdminController extends Controller
             abort(500, 'File backup tidak dapat dibuat.');
         }
 
-        $backup = ['format' => 'nadhim-portfolio-backup', 'version' => 1, 'created_at' => now()->toIso8601String(), 'projects' => [], 'news' => [], 'work_tasks' => [], 'project_payments' => [], 'marketplace_products' => [], 'marketplace_orders' => []];
+        $backup = ['format' => 'nadhim-portfolio-backup', 'version' => 1, 'created_at' => now()->toIso8601String(), 'projects' => [], 'news' => [], 'work_tasks' => [], 'project_payments' => [], 'marketplace_products' => [], 'marketplace_orders' => [], 'marketplace_order_items' => []];
         foreach (Project::orderBy('id')->get() as $project) {
             $backup['projects'][] = $this->backupRow($project->getAttributes(), $project->image, 'projects', $zip);
         }
@@ -212,6 +219,7 @@ class AdminController extends Controller
             $backup['marketplace_products'][] = $this->backupRow($product->getAttributes(), $product->image, 'marketplace', $zip);
         }
         $backup['marketplace_orders'] = MarketplaceOrder::orderBy('id')->get()->map(fn ($order) => $order->getAttributes())->all();
+        $backup['marketplace_order_items'] = MarketplaceOrderItem::orderBy('id')->get()->map(fn ($item) => $item->getAttributes())->all();
         $zip->addFromString('backup.json', json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
         $zip->close();
 
@@ -256,14 +264,16 @@ class AdminController extends Controller
             }
             $backup['marketplace_products'] ??= [];
             $backup['marketplace_orders'] ??= [];
-            if (!is_array($backup['marketplace_products']) || !is_array($backup['marketplace_orders']) || count($backup['marketplace_products']) > 10000 || count($backup['marketplace_orders']) > 10000) {
+            $backup['marketplace_order_items'] ??= [];
+            if (!is_array($backup['marketplace_products']) || !is_array($backup['marketplace_orders']) || !is_array($backup['marketplace_order_items']) || count($backup['marketplace_products']) > 10000 || count($backup['marketplace_orders']) > 10000 || count($backup['marketplace_order_items']) > 50000) {
                 return back()->withErrors(['backup' => 'Struktur data marketplace dalam backup tidak valid.']);
             }
 
             $counts = DB::transaction(function () use ($backup, $zip) {
-                $counts = ['projects' => 0, 'news' => 0, 'work_tasks' => 0, 'project_payments' => 0, 'marketplace_products' => 0, 'marketplace_orders' => 0];
+                $counts = ['projects' => 0, 'news' => 0, 'work_tasks' => 0, 'project_payments' => 0, 'marketplace_products' => 0, 'marketplace_orders' => 0, 'marketplace_order_items' => 0];
                 $taskMap = [];
                 $productMap = [];
+                $marketplaceOrderMap = [];
                 foreach ($backup['projects'] as $row) {
                     $this->validateBackupRow($row, ['title' => 'required|string|max:255', 'category' => 'required|string|max:100', 'description' => 'required|string|max:3000', 'link' => 'nullable|url|max:2048', 'sort_order' => 'nullable|integer|min:0']);
                     $model = Project::firstOrCreate(
@@ -331,25 +341,42 @@ class AdminController extends Controller
                         'customer_phone' => 'required|string|max:30', 'shipping_address' => 'required|string|max:1500',
                         'status' => 'required|string|max:30', 'payment_status' => 'required|string|max:30', 'snap_token' => 'nullable|string|max:255',
                         'redirect_url' => 'nullable|url|max:2048', 'transaction_id' => 'nullable|string|max:255', 'payment_type' => 'nullable|string|max:80',
-                        'notification_payload' => 'nullable|array', 'paid_at' => 'nullable|date',
+                        'notification_payload' => 'nullable|array', 'paid_at' => 'nullable|date', 'payment_method' => 'nullable|in:bank_transfer,qris',
                     ]);
                     $productId = isset($row['marketplace_product_id']) ? ($productMap[(string) $row['marketplace_product_id']] ?? null) : null;
                     $model = MarketplaceOrder::firstOrCreate(['order_id' => $row['order_id']], [
                         'marketplace_product_id' => $productId, 'public_token' => $row['public_token'], 'product_name' => $row['product_name'],
                         'unit_price' => $row['unit_price'], 'quantity' => $row['quantity'], 'total_amount' => $row['total_amount'],
                         'customer_name' => $row['customer_name'], 'customer_email' => $row['customer_email'] ?? null, 'customer_phone' => $row['customer_phone'],
-                        'shipping_address' => $row['shipping_address'], 'status' => $row['status'], 'payment_status' => $row['payment_status'],
+                        'shipping_address' => $row['shipping_address'], 'status' => $row['status'], 'payment_status' => ($row['payment_status'] ?? '') === 'proof_submitted' ? 'pending' : $row['payment_status'],
+                        'payment_method' => $row['payment_method'] ?? null, 'payment_proof_path' => null, 'payment_note' => $row['payment_note'] ?? null,
                         'snap_token' => $row['snap_token'] ?? null, 'redirect_url' => $row['redirect_url'] ?? null,
                         'transaction_id' => $row['transaction_id'] ?? null, 'payment_type' => $row['payment_type'] ?? null,
                         'notification_payload' => $row['notification_payload'] ?? null, 'paid_at' => $row['paid_at'] ?? null,
                         'created_at' => $row['created_at'] ?? now(), 'updated_at' => $row['updated_at'] ?? now(),
                     ]);
+                    $marketplaceOrderMap[(string) ($row['id'] ?? '')] = $model->id;
                     $counts['marketplace_orders'] += (int) $model->wasRecentlyCreated;
+                }
+                foreach ($backup['marketplace_order_items'] as $row) {
+                    $this->validateBackupRow($row, [
+                        'marketplace_order_id' => 'required|integer|min:1', 'marketplace_product_id' => 'nullable|integer|min:1',
+                        'product_name' => 'required|string|max:255', 'unit_price' => 'required|integer|min:1',
+                        'quantity' => 'required|integer|min:1', 'line_total' => 'required|integer|min:1',
+                    ]);
+                    $orderId = $marketplaceOrderMap[(string) $row['marketplace_order_id']] ?? null;
+                    if (!$orderId) continue;
+                    $productId = isset($row['marketplace_product_id']) ? ($productMap[(string) $row['marketplace_product_id']] ?? null) : null;
+                    $model = MarketplaceOrderItem::firstOrCreate([
+                        'marketplace_order_id' => $orderId, 'product_name' => $row['product_name'],
+                        'unit_price' => $row['unit_price'], 'quantity' => $row['quantity'],
+                    ], ['marketplace_product_id' => $productId, 'line_total' => $row['line_total']]);
+                    $counts['marketplace_order_items'] += (int) $model->wasRecentlyCreated;
                 }
                 return $counts;
             });
 
-            return back()->with('success', 'Pemulihan selesai. Ditambahkan ' . $counts['projects'] . ' proyek, ' . $counts['news'] . ' berita, ' . $counts['work_tasks'] . ' agenda, ' . $counts['project_payments'] . ' riwayat pembayaran proyek, ' . $counts['marketplace_products'] . ' barang, dan ' . $counts['marketplace_orders'] . ' pesanan marketplace. Data yang sudah ada tidak ditimpa.');
+            return back()->with('success', 'Pemulihan selesai. Ditambahkan ' . $counts['projects'] . ' proyek, ' . $counts['news'] . ' berita, ' . $counts['work_tasks'] . ' agenda, ' . $counts['project_payments'] . ' riwayat pembayaran proyek, ' . $counts['marketplace_products'] . ' barang, ' . $counts['marketplace_orders'] . ' pesanan, dan ' . $counts['marketplace_order_items'] . ' rincian barang marketplace. Data yang sudah ada tidak ditimpa.');
         } finally {
             $zip->close();
         }

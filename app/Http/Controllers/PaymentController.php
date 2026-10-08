@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\ProjectPayment;
 use App\Models\WorkTask;
-use App\Models\MarketplaceOrder;
-use App\Models\MarketplaceProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -81,15 +79,6 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Invalid signature.'], 403);
         }
 
-        $order = MarketplaceOrder::where('order_id', $orderId)->first();
-        if ($order) {
-            if (number_format((float) $order->total_amount, 2, '.', '') !== number_format((float) $grossAmount, 2, '.', '')) {
-                return response()->json(['message' => 'Transaction amount mismatch.'], 400);
-            }
-            $this->updateMarketplaceOrderFromNotification($order, $payload);
-            return response()->json(['status' => 'ok']);
-        }
-
         $payment = ProjectPayment::where('order_id', $orderId)->first();
         if (!$payment || number_format((float) $payment->gross_amount, 2, '.', '') !== number_format((float) $grossAmount, 2, '.', '')) {
             return response()->json(['message' => 'Transaction not found.'], 404);
@@ -132,44 +121,6 @@ class PaymentController extends Controller
         });
 
         return response()->json(['status' => 'ok']);
-    }
-
-    private function updateMarketplaceOrderFromNotification(MarketplaceOrder $order, array $payload): void
-    {
-        DB::transaction(function () use ($order, $payload) {
-            $order = MarketplaceOrder::whereKey($order->id)->lockForUpdate()->firstOrFail();
-            if ($order->payment_status === 'paid') return;
-            $previousStatus = $order->status;
-            $transactionStatus = $payload['transaction_status'] ?? '';
-            $newPaymentStatus = match ($transactionStatus) {
-                'settlement' => 'paid',
-                'capture' => ($payload['fraud_status'] ?? null) === 'accept' ? 'paid' : 'pending',
-                'pending' => 'pending',
-                'deny' => 'denied',
-                'cancel' => 'cancelled',
-                'expire' => 'expired',
-                default => $order->payment_status,
-            };
-            $newOrderStatus = match ($newPaymentStatus) {
-                'paid' => 'awaiting_fulfillment',
-                'denied' => 'payment_failed',
-                'cancelled' => 'cancelled',
-                'expired' => 'expired',
-                default => $order->status,
-            };
-            $order->update([
-                'payment_status' => $newPaymentStatus,
-                'status' => $newOrderStatus,
-                'transaction_id' => $payload['transaction_id'] ?? $order->transaction_id,
-                'payment_type' => $payload['payment_type'] ?? $order->payment_type,
-                'notification_payload' => $payload,
-                'paid_at' => $newPaymentStatus === 'paid' ? ($order->paid_at ?? now()) : $order->paid_at,
-            ]);
-
-            if (in_array($newPaymentStatus, ['denied', 'cancelled', 'expired'], true) && $previousStatus === 'awaiting_payment' && $order->marketplace_product_id) {
-                MarketplaceProduct::whereKey($order->marketplace_product_id)->lockForUpdate()->increment('stock', $order->quantity);
-            }
-        });
     }
 
     private function gatewayConfigured(): bool

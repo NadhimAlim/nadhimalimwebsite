@@ -105,6 +105,6 @@ class HomeController extends Controller
             return redirect()->to(route('home') . '#kontak')->with('success', 'Permintaan konsultasi tersimpan di dashboard admin. Nomor WhatsApp admin belum diatur.');
         }
 
-        return redirect()->to(route('home') . '#kontak')->with('success', 'Pesan Anda berhasil dikirim. Terima kasih sudah menghubungi saya.');
+        return redirect()->to(route('home') . '#kontak')->with('success', 'Pesan Anda berhasil dikirim. Terima kasih sudah berbagi cerita. Saya akan membacanya dengan baik.');
     }
 }

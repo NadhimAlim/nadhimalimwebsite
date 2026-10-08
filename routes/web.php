@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\MarketplaceAccountController;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -15,9 +16,22 @@ Route::post('/contact', [HomeController::class, 'contact'])->name('contact.send'
 Route::get('/pembayaran/{payment:public_token}', [\App\Http\Controllers\PaymentController::class, 'show'])->name('payments.show');
 Route::post('/midtrans/notification', [\App\Http\Controllers\PaymentController::class, 'notification'])->name('midtrans.notification');
 Route::get('/toko', [MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/akun/masuk', [MarketplaceAccountController::class, 'login'])->name('marketplace.account.login');
+Route::post('/akun/masuk', [MarketplaceAccountController::class, 'authenticate'])->middleware('throttle:8,1')->name('marketplace.account.authenticate');
+Route::get('/akun/daftar', [MarketplaceAccountController::class, 'register'])->name('marketplace.account.register');
+Route::post('/akun/daftar', [MarketplaceAccountController::class, 'store'])->middleware('throttle:5,1')->name('marketplace.account.store');
+Route::post('/akun/keluar', [MarketplaceAccountController::class, 'logout'])->name('marketplace.account.logout');
+Route::get('/akun/pesanan', [MarketplaceAccountController::class, 'orders'])->name('marketplace.account.orders');
 Route::get('/toko/{product:slug}', [MarketplaceController::class, 'show'])->name('marketplace.show');
 Route::post('/toko/{product:slug}/pesan', [MarketplaceController::class, 'order'])->middleware('throttle:10,1')->name('marketplace.order');
+Route::get('/keranjang', [MarketplaceController::class, 'cart'])->name('marketplace.cart');
+Route::post('/keranjang/{product:slug}', [MarketplaceController::class, 'addToCart'])->name('marketplace.cart.add');
+Route::patch('/keranjang/{product:slug}', [MarketplaceController::class, 'updateCart'])->name('marketplace.cart.update');
+Route::delete('/keranjang/{product:slug}', [MarketplaceController::class, 'removeFromCart'])->name('marketplace.cart.remove');
+Route::get('/checkout', [MarketplaceController::class, 'checkoutCart'])->name('marketplace.checkout.cart');
+Route::post('/checkout', [MarketplaceController::class, 'placeOrder'])->middleware('throttle:10,1')->name('marketplace.checkout.place');
 Route::get('/pesanan/{order:public_token}', [MarketplaceController::class, 'checkout'])->name('marketplace.checkout');
+Route::post('/pesanan/{order:public_token}/bukti', [MarketplaceController::class, 'uploadPaymentProof'])->middleware('throttle:5,1')->name('marketplace.payment-proof');
 
 Route::get('/admin', [AdminController::class, 'login'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'authenticate'])->middleware('throttle:5,1')->name('admin.authenticate');
@@ -38,6 +52,10 @@ Route::middleware('portfolio.admin')->prefix('admin')->name('admin.')->group(fun
     Route::put('/marketplace/products/{product}', [MarketplaceController::class, 'update'])->name('marketplace.products.update');
     Route::delete('/marketplace/products/{product}', [MarketplaceController::class, 'destroy'])->name('marketplace.products.destroy');
     Route::put('/marketplace/orders/{order}', [MarketplaceController::class, 'updateOrder'])->name('marketplace.orders.update');
+    Route::put('/marketplace/shipping-fee', [MarketplaceController::class, 'updateShippingFee'])->name('marketplace.shipping-fee.update');
+    Route::put('/marketplace/payment-settings', [MarketplaceController::class, 'updatePaymentSettings'])->name('marketplace.payment-settings.update');
+    Route::get('/marketplace/orders/{order}/proof', [MarketplaceController::class, 'showPaymentProof'])->name('marketplace.orders.proof');
+    Route::put('/marketplace/orders/{order}/payment-review', [MarketplaceController::class, 'reviewPayment'])->name('marketplace.orders.payment-review');
     Route::put('/projects/{project}', [AdminController::class, 'updateProject'])->name('projects.update');
     Route::delete('/projects/{project}', [AdminController::class, 'deleteProject'])->name('projects.delete');
     Route::post('/services', [AdminController::class, 'storeService'])->name('services.store');

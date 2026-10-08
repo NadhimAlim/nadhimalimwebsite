@@ -16,6 +16,6 @@ class MarketplaceProduct extends Model
 
     public function orders(): HasMany
     {
-        return $this->hasMany(MarketplaceOrder::class, 'product_id');
+        return $this->hasMany(MarketplaceOrder::class, 'marketplace_product_id');
     }
 }

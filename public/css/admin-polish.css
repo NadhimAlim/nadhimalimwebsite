@@ -35,3 +35,105 @@
 .task-payments{margin:0 14px 13px;padding:14px;border:1px solid #e7eadd;border-radius:9px;background:#fbfcf9}.task-payments-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}.task-payments-heading strong{font:600 11px Manrope;color:#42483a}.task-payments-heading strong i{margin-right:5px;color:#819b49}.task-payments-heading>span{padding:4px 7px;border-radius:20px;background:#eef3e5;color:#768b4c;font-size:8px}.payment-link-list{display:grid;gap:7px;margin-bottom:10px}.payment-link-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border:1px solid #eceee8;border-radius:7px;background:#fff}.payment-link-row>span{display:grid;gap:4px}.payment-link-row strong{font:600 11px Manrope}.payment-link-row small{color:#85897e;font-size:9px}.payment-link-row .admin-button{padding:7px 9px;font-size:9px;white-space:nowrap}.payment-create-form{grid-template-columns:repeat(3,minmax(0,1fr)) auto;align-items:end;gap:9px}.payment-create-form label{display:grid;gap:6px;color:#656a5e;font-size:9px;font-weight:600}.payment-create-form input{min-width:0;width:100%;height:36px;padding:8px 9px;border:1px solid #e2e5dc;border-radius:6px;background:#fff;font:10px 'DM Sans'}.payment-create-form .admin-button{height:36px;padding:0 11px;font-size:9px;white-space:nowrap}.payment-gateway-note{display:flex;align-items:center;gap:7px;margin:0;color:#83877c;font-size:9px;line-height:1.6}.payment-gateway-note i{color:#82964c}@media(max-width:760px){.payment-create-form{grid-template-columns:1fr 1fr}.payment-create-form .admin-button{grid-column:1/-1;justify-self:start}.payment-link-row{align-items:flex-start;flex-direction:column}.task-payments{margin-right:10px;margin-left:10px}}
 .marketplace-config-note{margin:-3px 0 18px;padding:12px;border:1px solid #e8e4cd;border-radius:7px;background:#fbf9ee}.marketplace-create-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px;padding:19px;border:1px solid var(--admin-line);border-radius:10px;background:#fafbf8}.marketplace-create-form label,.marketplace-edit-form label{display:grid;gap:6px;color:#5b6055;font-size:10px;font-weight:600}.marketplace-create-form input,.marketplace-create-form textarea,.marketplace-create-form select,.marketplace-edit-form input,.marketplace-edit-form textarea,.marketplace-edit-form select{width:100%;min-width:0;padding:9px 10px;border:1px solid #e1e5dc;border-radius:6px;background:#fff;color:#30342b;font:10px 'DM Sans'}.marketplace-create-form .wide,.marketplace-edit-form .wide{grid-column:1/-1}.marketplace-create-form .admin-button{justify-self:start}.marketplace-admin-grid,.marketplace-order-list{display:grid;gap:9px}.marketplace-product-admin,.marketplace-order{overflow:hidden;border:1px solid var(--admin-line);border-radius:9px;background:#fff}.marketplace-product-admin>summary,.marketplace-order>summary{display:flex;align-items:center;gap:12px;padding:12px 14px;list-style:none;cursor:pointer}.marketplace-product-admin>summary::-webkit-details-marker,.marketplace-order>summary::-webkit-details-marker{display:none}.marketplace-admin-thumb{display:grid;flex:0 0 46px;width:46px;height:46px;overflow:hidden;place-items:center;border-radius:7px;background:#f0f3e9;color:#819a4b}.marketplace-admin-thumb img{width:100%;height:100%;object-fit:cover}.marketplace-admin-summary,.order-number,.order-customer{display:grid;flex:1;min-width:0;gap:4px}.marketplace-admin-summary strong,.order-customer strong{overflow:hidden;font:600 11px Manrope;text-overflow:ellipsis;white-space:nowrap}.marketplace-admin-summary small,.order-number small,.order-customer small{color:#858a7e;font-size:9px}.marketplace-admin-status,.order-state{padding:5px 8px;border-radius:15px;background:#f1f1ed;color:#7a7e74;font-size:8px;white-space:nowrap}.marketplace-admin-status.active,.order-state.paid{background:#edf4e2;color:#66823c}.marketplace-edit-form{grid-template-columns:repeat(3,minmax(0,1fr));margin:0 12px 10px;padding:14px;border:1px solid var(--admin-line);border-radius:8px;background:#fafbf8}.marketplace-product-admin>.marketplace-delete-form{margin:0 12px 12px}.marketplace-delete-form .admin-button{font-size:9px}.marketplace-orders-panel{margin-top:16px}.order-number{flex:0 0 105px}.order-number strong{font:600 10px Manrope}.order-total{font:700 10px Manrope;white-space:nowrap}.marketplace-order-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 14px 14px;padding:14px;border:1px solid #eceee8;border-radius:8px;background:#fafbf8}.marketplace-order-detail>div{display:grid;gap:5px}.marketplace-order-detail>div span{color:#858a7e;font-size:9px}.marketplace-order-detail>div strong{color:#3b4035;font-size:10px;line-height:1.5;overflow-wrap:anywhere}.marketplace-order-detail>.order-address{grid-column:1/-1}.marketplace-order-detail>form{display:flex;grid-column:1/-1;align-items:end;gap:10px}.marketplace-order-detail>form label{display:grid;flex:1;gap:6px;color:#656b5e;font-size:9px}.marketplace-order-detail>form select{height:35px;padding:7px 9px;border:1px solid #e1e5dc;border-radius:6px;background:#fff;font:10px 'DM Sans'}.marketplace-order-detail>form .admin-button{height:35px;padding:0 10px;font-size:9px}@media(max-width:760px){.marketplace-create-form,.marketplace-edit-form{grid-template-columns:repeat(2,minmax(0,1fr));padding:13px}.marketplace-order>summary{gap:7px;padding:10px}.order-number{flex-basis:75px}.order-number small{font-size:8px}.order-customer strong{font-size:9px}.order-customer small{font-size:8px}.order-total{font-size:9px}.order-state{font-size:7px;padding:4px 6px}.marketplace-product-admin>summary{gap:8px;padding:10px}.marketplace-admin-status{font-size:7px}}
 .backup-inventory-grid{grid-template-columns:repeat(5,minmax(0,1fr))}@media(max-width:900px){.backup-inventory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:760px){.backup-inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.marketplace-shipping-setting{display:flex;align-items:center;gap:12px;margin:0 0 18px;padding:13px 15px;border:1px solid var(--admin-line);border-radius:8px;background:#fafbf8}.marketplace-shipping-setting>div{display:grid;flex:1;gap:4px}.marketplace-shipping-setting>div strong{font:600 10px Manrope;color:#454b3e}.marketplace-shipping-setting>div strong i{margin-right:5px;color:#7e9849}.marketplace-shipping-setting>div small{color:#858a7e;font-size:8px}.marketplace-shipping-setting>label{display:grid;gap:4px;color:#686d61;font-size:8px}.marketplace-shipping-setting input{width:130px;padding:8px;border:1px solid #e1e5dc;border-radius:5px;background:#fff;font:10px 'DM Sans'}.marketplace-shipping-setting .admin-button{padding:9px 11px;font-size:9px}.order-items-admin{grid-column:1/-1;padding-bottom:10px;border-bottom:1px solid #e8ebe3}.order-items-admin>strong{display:flex;justify-content:space-between;gap:8px;margin-top:7px}.order-items-admin>strong small{color:#626a55;font-size:9px;font-weight:500}@media(max-width:620px){.marketplace-shipping-setting{align-items:flex-start;flex-wrap:wrap}.marketplace-shipping-setting>div{flex-basis:100%}.marketplace-shipping-setting input{width:115px}}
+
+/* Marketplace admin refinements */
+.marketplace-admin-panel .marketplace-payment-settings { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 14px; margin: 0 0 16px; padding: 18px; border: 1px solid var(--admin-line); border-radius: 10px; background: #fafbf8; }
+.marketplace-payment-settings .wide { grid-column: 1 / -1; }
+.marketplace-payment-settings .wide h3 { margin: 6px 0 4px; color: #292d25; font: 650 16px Manrope, sans-serif; }
+.marketplace-payment-settings .wide p { margin: 0; line-height: 1.6; }
+.marketplace-payment-settings > label, .marketplace-qris-control > label { display: grid; gap: 7px; color: #555b50; font-size: 11px; font-weight: 600; }
+.marketplace-payment-settings input:not([type="checkbox"]), .marketplace-payment-settings input[type="file"] { min-width: 0; min-height: 40px; padding: 9px 10px; border: 1px solid #dfe4d8; border-radius: 6px; background: #fff; color: #30342b; font: 12px 'DM Sans', sans-serif; }
+.marketplace-payment-settings input[type="file"] { padding: 7px; }
+.marketplace-payment-settings small { color: #83897d; font-size: 10px; }
+.marketplace-payment-settings small a { color: #567d32; font-weight: 600; }
+.marketplace-qris-control { display: grid; gap: 8px; }
+.marketplace-payment-settings .marketplace-remove-qris { display: flex; align-items: center; gap: 7px; color: #9c5147; font-size: 11px; font-weight: 500; }
+.marketplace-payment-settings .marketplace-remove-qris input { width: 15px; height: 15px; min-height: 0; margin: 0; accent-color: #a34b3e; }
+.marketplace-payment-settings > .admin-button { justify-self: start; min-height: 40px; }
+.marketplace-order-counts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+.marketplace-order-counts .needs-review { background: #fff4dc; color: #8b641e; }
+.marketplace-order-detail > form { flex-wrap: wrap; }
+.marketplace-order-detail > form label { min-width: 180px; }
+.marketplace-order-detail > form label input { min-width: 0; height: 35px; padding: 7px 9px; border: 1px solid #e1e5dc; border-radius: 6px; background: #fff; font: 11px 'DM Sans', sans-serif; }
+.marketplace-order .order-state:not(.paid) { background: #fff5df; color: #8b641e; }
+.marketplace-order .order-state.paid { background: #edf4e2; color: #66823c; }
+.marketplace-create-form label, .marketplace-edit-form label { font-size: 11px; }
+.marketplace-create-form input, .marketplace-create-form textarea, .marketplace-create-form select, .marketplace-edit-form input, .marketplace-edit-form textarea, .marketplace-edit-form select { min-height: 38px; font-size: 12px; }
+.marketplace-shipping-setting > label { font-size: 10px; }
+.marketplace-shipping-setting input { min-height: 38px; font-size: 12px; }
+@media (max-width: 760px) {
+  .marketplace-admin-panel .marketplace-payment-settings { grid-template-columns: 1fr; }
+  .marketplace-payment-settings .wide { grid-column: auto; }
+  .marketplace-payment-settings > .admin-button { justify-self: stretch; justify-content: center; }
+  .marketplace-order-counts { justify-content: flex-start; }
+  .marketplace-order > summary { flex-wrap: wrap; align-items: center; }
+  .marketplace-order > summary .order-customer { flex: 1 1 calc(100% - 65px); order: 2; }
+  .marketplace-order > summary .order-number { flex: 1 1 85px; order: 1; }
+  .marketplace-order > summary .order-total { order: 3; margin-left: auto; }
+  .marketplace-order > summary .order-state { order: 4; }
+  .marketplace-order-detail { grid-template-columns: 1fr; margin: 0 9px 10px; padding: 11px; }
+  .marketplace-order-detail > .order-address, .marketplace-order-detail > form { grid-column: auto; }
+  .marketplace-order-detail > form { align-items: stretch; }
+  .marketplace-order-detail > form label { flex: 1 1 100%; min-width: 0; }
+  .marketplace-order-detail > form .admin-button { flex: 1 1 auto; justify-content: center; }
+}
+.marketplace-zone-setting { align-items: stretch; }
+.marketplace-zone-setting > div { align-content: center; min-width: 220px; }
+.marketplace-zone-setting > label { flex: 1 1 380px; min-width: 250px; font-size: 10px; }
+.marketplace-zone-setting textarea { width: 100%; min-height: 110px; resize: vertical; padding: 10px; border: 1px solid #dfe4d8; border-radius: 6px; background: #fff; color: #30342b; font: 12px/1.6 'DM Sans', sans-serif; }
+.marketplace-zone-setting .admin-button { align-self: end; min-height: 38px; }
+@media (max-width: 620px) { .marketplace-zone-setting > label { flex-basis: 100%; min-width: 100%; } .marketplace-zone-setting .admin-button { width: 100%; justify-content: center; } }
+
+/* Admin inbox */
+.messages-panel > .panel-heading { align-items: center; }
+.messages-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 20px; }
+.messages-overview article { position: relative; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; min-height: 78px; padding: 15px 17px; border: 1px solid #e7eade; border-radius: 9px; background: #fbfcf9; }
+.messages-overview article > span { color: #777c70; font-size: 11px; }
+.messages-overview article > strong { color: #24291f; font: 700 23px/1 Manrope, sans-serif; }
+.messages-overview article > i { grid-column: 2; grid-row: 1 / span 2; color: #899b63; font-size: 21px; }
+.messages-overview article.unread { border-color: #d9e9bd; background: #f5f9ed; }
+.messages-overview article.unread > i { color: #779b35; }
+.messages-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.messages-search { display: flex; align-items: center; gap: 10px; flex: 1 1 240px; max-width: 390px; min-width: 180px; height: 40px; padding: 0 12px; border: 1px solid #e3e7dc; border-radius: 7px; background: #fff; color: #92978a; }
+.messages-search:focus-within { border-color: #a7c66c; box-shadow: 0 0 0 3px #a7c66c20; }
+.messages-search input { width: 100%; border: 0; outline: 0; background: transparent; color: #30352b; font: 12px 'DM Sans', sans-serif; }
+.messages-filters { display: flex; flex-wrap: wrap; gap: 5px; }
+.messages-filters button { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 10px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #74796e; font: 600 10px 'DM Sans', sans-serif; cursor: pointer; }
+.messages-filters button span { display: inline-grid; min-width: 18px; height: 18px; place-items: center; padding: 0 4px; border-radius: 10px; background: #eff1eb; color: #6e7466; font-size: 9px; }
+.messages-filters button:hover, .messages-filters button.active { border-color: #e6eadf; background: #f5f7f1; color: #38442b; }
+.contact-message-list { display: grid; gap: 12px; }
+.contact-message-card { padding: 18px 20px; border: 1px solid #e7eade; border-radius: 9px; background: #fff; transition: border-color .18s, box-shadow .18s; }
+.contact-message-card:hover { border-color: #d9dfce; box-shadow: 0 5px 18px #26301c0a; }
+.contact-message-card.is-unread { border-left: 3px solid #9bc64b; }
+.contact-message-card[hidden], .messages-no-results[hidden] { display: none !important; }
+.message-sender { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.message-avatar { display: grid; flex: 0 0 38px; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: #edf3e3; color: #587b2a; font: 700 14px Manrope, sans-serif; }
+.message-sender-line { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.contact-message-heading h3 { margin: 0; color: #252920; font: 700 13px Manrope, sans-serif; }
+.message-sender > div > a { display: inline-block; margin-top: 4px; color: #79816e; font-size: 10px; text-decoration: none; }
+.message-sender > div > a:hover { color: #5d7d2c; text-decoration: underline; }
+.message-state, .message-kind { display: inline-flex; align-items: center; gap: 4px; margin: 0; padding: 4px 7px; border-radius: 12px; font-size: 9px; font-weight: 700; }
+.message-state.unread { background: #eff6e2; color: #688a31; }
+.message-state.read { background: #f0f1ed; color: #777c72; }
+.message-kind { background: #f1eff8; color: #716091; }
+.contact-message-heading time { display: grid; gap: 4px; flex: 0 0 auto; color: #73796c; text-align: right; font-size: 10px; }
+.contact-message-heading time span { color: #9a9e94; font-size: 9px; }
+.message-content { margin: 16px 0 13px; padding: 13px 15px; border: 1px solid #f0f1ed; border-radius: 7px; background: #fafbf8; }
+.message-content-label { color: #8a9082; font-size: 8px; font-weight: 700; letter-spacing: .12em; }
+.message-content p { margin: 7px 0 0; color: #4f544a; font-size: 12px; line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; }
+.message-actions { align-items: center; gap: 7px; padding-top: 12px; border-top: 1px solid #f0f1ec; }
+.message-actions form { display: inline-flex; }
+.message-actions .admin-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 34px; padding: 0 10px; border: 1px solid #e5e8df; border-radius: 6px; background: #fff; color: #5f655a; font-size: 10px; text-decoration: none; }
+.message-actions .admin-button:hover { border-color: #cbd8b6; background: #f7f9f3; }
+.message-actions .message-reply-button { border-color: #293628; background: #293628; color: #fff; }
+.message-actions .message-reply-button:hover { background: #3a4a36; }
+.message-actions .message-status-button { border-color: #e1e9d3; background: #f4f7ed; color: #607b35; }
+.message-actions .admin-button.danger { color: #a65f55; }
+.messages-empty, .messages-no-results { padding: 34px 18px; border: 1px dashed #dfe4d7; border-radius: 9px; background: #fbfcf9; text-align: center; }
+.messages-empty > span { display: inline-grid; width: 44px; height: 44px; place-items: center; border-radius: 50%; background: #eff4e6; color: #779a3b; font-size: 20px; }
+.messages-empty h3 { margin: 12px 0 5px; color: #34392f; font: 700 14px Manrope, sans-serif; }
+.messages-empty p, .messages-no-results { margin: 0; color: #82877d; font-size: 11px; }
+.messages-no-results { padding: 18px; }
+@media (max-width: 760px) { .messages-toolbar { align-items: stretch; flex-direction: column; } .messages-search { max-width: none; flex-basis: 40px; } .messages-filters { overflow-x: auto; flex-wrap: nowrap; } .messages-filters button { flex: 0 0 auto; } }
+@media (max-width: 560px) { .messages-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); } .messages-overview article:first-child { grid-column: 1 / -1; } .contact-message-card { padding: 15px; } .contact-message-heading { flex-direction: row; align-items: flex-start; } .message-avatar { flex-basis: 34px; width: 34px; height: 34px; } .contact-message-heading time { font-size: 9px; } .contact-message-heading time span { font-size: 8px; } .message-actions { align-items: stretch; } .message-actions form, .message-actions .admin-button { flex: 1 1 auto; } }

@@ -5,13 +5,15 @@
     <meta name="description" content="Lihat dan pesan barang dari Nadhim Alim.">
     <title>Toko · Nadhim Alim</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="stylesheet" href="{{ asset('css/marketplace.css') }}?v=2">
-</head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="stylesheet" href="{{ asset('css/marketplace.css') }}?v=6">
+<link rel="stylesheet" href="{{ asset('css/feedback.css') }}?v=1"></head>
 <body>
-<header class="shop-nav"><a class="shop-brand" href="{{ route('home') }}">NA<span>.</span></a><form class="shop-search" action="{{ route('marketplace.index') }}" method="GET"><input type="search" name="q" value="{{ $search }}" placeholder="Cari barang yang kamu inginkan..." aria-label="Cari barang"><button type="submit" aria-label="Cari"><i class="bi bi-search"></i></button></form><a class="shop-nav-back" href="{{ route('home') }}"><i class="bi bi-arrow-left"></i> Kembali</a></header>
+@php($cartCount = collect(session('marketplace_cart', []))->sum())
+<header class="shop-nav"><a class="shop-brand" href="{{ route('home') }}">NA<span>.</span></a><form class="shop-search" action="{{ route('marketplace.index') }}" method="GET"><input type="search" name="q" value="{{ $search }}" placeholder="Cari barang yang kamu inginkan..." aria-label="Cari barang"><button type="submit" aria-label="Cari"><i class="bi bi-search"></i></button></form><a class="shop-cart-link" href="{{ route('marketplace.cart') }}"><i class="bi bi-bag"></i><span>Keranjang</span>@if($cartCount)<b>{{ $cartCount }}</b>@endif</a><a class="shop-nav-back" href="{{ route('home') }}"><i class="bi bi-arrow-left"></i> Kembali</a></header>
 <main class="shop-wrap">
+    @if(session('cart_success'))<div class="shop-success"><i class="bi bi-check-circle"></i> {{ session('cart_success') }} <a href="{{ route('marketplace.cart') }}">Lihat keranjang</a></div>@endif
     <section class="shop-hero"><div class="shop-hero-copy"><span class="shop-kicker">TOKO NADHIM ALIM</span><h1>Barang pilihan,<br><em>langsung untukmu.</em></h1><p>Jelajahi koleksi yang tersedia. Pilih barang, tentukan jumlah, lalu lanjutkan pembayaran dengan aman.</p></div><span class="shop-hero-mark"><i class="bi bi-bag-heart"></i></span></section>
-    <div class="shop-benefits"><article><i class="bi bi-shield-check"></i><span><strong>Checkout aman</strong><small>Pembayaran melalui Midtrans</small></span></article><article><i class="bi bi-box-seam"></i><span><strong>Stok diperbarui</strong><small>Ketersediaan barang terlihat langsung</small></span></article><article><i class="bi bi-chat-dots"></i><span><strong>Bantuan personal</strong><small>Admin siap membantu pesananmu</small></span></article></div>
+    <div class="shop-benefits"><article><i class="bi bi-shield-check"></i><span><strong>Bayar fleksibel</strong><small>Transfer bank atau QRIS manual</small></span></article><article><i class="bi bi-box-seam"></i><span><strong>Stok diperbarui</strong><small>Ketersediaan barang terlihat langsung</small></span></article><article><i class="bi bi-chat-dots"></i><span><strong>Dicek langsung</strong><small>Admin memverifikasi bukti pembayaran</small></span></article></div>
     <section class="shop-catalog"><div class="shop-section-heading"><div><span class="shop-kicker">ETALASE</span><h2>{{ $search ? 'Hasil pencarian' : ($category ?: 'Semua barang') }}</h2></div><span>{{ $products->total() }} barang</span></div>
         @if($categories->isNotEmpty())<nav class="shop-categories" aria-label="Kategori barang"><a class="shop-category-filter {{ $category === '' ? 'active' : '' }}" href="{{ route('marketplace.index', array_filter(['q' => $search])) }}">Semua</a>@foreach($categories as $item)<a class="shop-category-filter {{ $category === $item ? 'active' : '' }}" href="{{ route('marketplace.index', array_filter(['q' => $search, 'kategori' => $item])) }}">{{ $item }}</a>@endforeach</nav>@endif
         <div class="shop-grid">
@@ -27,7 +29,7 @@
                             <span class="shop-category">{{ $product->category }}</span>
                         @endif
                     </a>
-                    <div class="shop-card-body"><h3><a href="{{ route('marketplace.show', $product->slug) }}">{{ $product->name }}</a></h3><p>{{ \Illuminate\Support\Str::limit($product->description, 105) }}</p><div class="shop-card-footer"><strong>Rp {{ number_format($product->price, 0, ',', '.') }}</strong><a href="{{ route('marketplace.show', $product->slug) }}" aria-label="Lihat {{ $product->name }}"><i class="bi bi-arrow-up-right"></i></a></div><small class="stock-note">{{ $product->stock > 0 ? 'Stok tersedia' : 'Stok habis' }}</small></div>
+                    <div class="shop-card-body"><h3><a href="{{ route('marketplace.show', $product->slug) }}">{{ $product->name }}</a></h3><p>{{ \Illuminate\Support\Str::limit($product->description, 105) }}</p><div class="shop-card-footer"><strong>Rp {{ number_format($product->price, 0, ',', '.') }}</strong><a href="{{ route('marketplace.show', $product->slug) }}" aria-label="Lihat {{ $product->name }}"><i class="bi bi-arrow-up-right"></i></a></div><small class="stock-note">{{ $product->stock > 0 ? 'Stok tersedia' : 'Stok habis' }}</small><form class="shop-card-add" action="{{ route('marketplace.cart.add', $product->slug) }}" method="POST">@csrf<input type="hidden" name="quantity" value="1"><button type="submit" @disabled($product->stock < 1)><i class="bi bi-plus-lg"></i> Tambah ke keranjang</button></form></div>
                 </article>
             @empty
                 <div class="shop-empty"><i class="bi bi-bag"></i><h3>Etalase sedang disiapkan.</h3><p>Barang yang tersedia akan muncul di sini.</p></div>
@@ -37,5 +39,6 @@
     </section>
 </main>
 <footer class="shop-footer"><span>NA<span>.</span> · Marketplace</span><span>© {{ now()->year }} Nadhim Alim</span></footer>
+<script src="{{ asset('js/feedback.js') }}" defer></script>
 </body>
 </html>
