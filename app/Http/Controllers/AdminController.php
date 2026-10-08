@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PortfolioSetting;
 use App\Models\Project;
 use App\Models\Service;
+use App\Models\Skill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -34,7 +35,7 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard');
     }
 
-    public function dashboard()
+    public function dashboard(string $section = 'overview')
     {
         if (Service::count() === 0) {
             foreach ([
@@ -47,8 +48,10 @@ class AdminController extends Controller
         }
 
         return view('admin.dashboard', [
+            'section' => $section,
             'projects' => Project::latest()->get(),
             'services' => Service::orderBy('id')->get(),
+            'skills' => Skill::orderBy('type')->orderBy('name')->get(),
             'cvPath' => PortfolioSetting::where('key', 'cv_path')->value('value'),
             'profilePhoto' => PortfolioSetting::where('key', 'profile_photo')->value('value'),
         ]);
@@ -85,6 +88,36 @@ class AdminController extends Controller
         ]);
     }
 
+    public function storeSkill(Request $request)
+    {
+        Skill::create($this->validatedSkill($request));
+
+        return back()->with('success', 'Keahlian berhasil ditambahkan.');
+    }
+
+    public function updateSkill(Request $request, Skill $skill)
+    {
+        $skill->update($this->validatedSkill($request));
+
+        return back()->with('success', 'Keahlian berhasil diperbarui.');
+    }
+
+    public function deleteSkill(Skill $skill)
+    {
+        $skill->delete();
+
+        return back()->with('success', 'Keahlian berhasil dihapus.');
+    }
+
+    private function validatedSkill(Request $request): array
+    {
+        return $request->validate([
+            'name' => 'required|string|max:100',
+            'type' => 'required|in:hard,soft',
+            'level' => 'required|integer|min:1|max:100',
+        ]);
+    }
+
     public function storeProject(Request $request)
     {
         $data = $request->validate([
@@ -112,6 +145,29 @@ class AdminController extends Controller
         $project->delete();
 
         return back()->with('success', 'Proyek berhasil dihapus.');
+    }
+
+    public function updateProject(Request $request, Project $project)
+    {
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'description' => 'required|string|max:3000',
+            'link' => 'nullable|url|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $previous = $project->image;
+            $data['image'] = $request->file('image')->store('projects', 'public');
+            if ($previous) {
+                Storage::disk('public')->delete($previous);
+            }
+        }
+
+        $project->update($data);
+
+        return back()->with('success', 'Proyek dan foto sampul berhasil diperbarui.');
     }
 
     public function uploadCv(Request $request)

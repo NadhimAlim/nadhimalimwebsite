@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="id">
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -6,7 +6,7 @@
     <title>Nadhim Alim — Kreator Digital & Web Developer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="stylesheet" href="{{ asset('css/portfolio.css') }}"><link rel="stylesheet" href="{{ asset('css/pricing.css') }}"><link rel="stylesheet" href="{{ asset('css/pagination.css') }}"><link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="stylesheet" href="{{ asset('css/portfolio.css') }}"><link rel="stylesheet" href="{{ asset('css/pricing.css') }}"><link rel="stylesheet" href="{{ asset('css/pagination.css') }}"><link rel="stylesheet" href="{{ asset('css/profile.css') }}"><link rel="stylesheet" href="{{ asset('css/footer.css') }}">
 </head>
 <body>
 <header class="nav-wrap"><nav class="nav container"><a class="brand" href="#home">NA<span>.</span></a><button class="menu-toggle" aria-label="Buka menu" onclick="document.querySelector('.nav-links').classList.toggle('open')"><i class="bi bi-list"></i></button><div class="nav-links"><a href="#tentang">Tentang</a><a href="#karya">Karya</a><a href="#layanan">Layanan & harga</a><a href="#keahlian">Keahlian</a><a href="#cv">CV</a><a href="#kontak">Kontak</a></div><a class="nav-cta" href="#kontak">Mari ngobrol <i class="bi bi-arrow-up-right"></i></a></nav></header>
@@ -16,10 +16,30 @@
 <section class="section container about-section" id="tentang"><div class="section-label"><span>01 / TENTANG SAYA</span><i></i></div><div class="about-grid"><h2>Rasa ingin tahu adalah awal dari <em>karya hebat.</em></h2><div class="about-copy"><p>Saya percaya karya digital yang baik terasa sederhana untuk digunakan dan berkesan untuk diingat. Saya menggabungkan kreativitas, teknologi, dan perhatian pada detail untuk membuatnya nyata.</p><p>Saat tidak sedang membuat sesuatu di layar, saya berbagi proses dan inspirasi dengan komunitas melalui media sosial.</p><a class="text-link" href="#kontak">Ceritakan ide Anda <i class="bi bi-arrow-up-right"></i></a></div></div></section>
 <section class="section work-section" id="karya"><div class="container"><div class="section-label"><span>02 / PILIHAN KARYA</span><i></i><span class="section-note">Beberapa hal yang telah dibuat</span></div><div class="work-heading"><h2>Ide jadi <em>realita.</em></h2><span>{{ $projects->total() }} proyek</span></div><div class="project-grid">@forelse($projects as $index => $project)<article class="project-card"><div class="project-image" style="--project-hue: {{ ($index * 57 + 24) % 360 }}deg">@if($project->image)<img src="{{ asset('storage/'.$project->image) }}" alt="{{ $project->title }}">@else<div class="project-art"><span>{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span><i class="bi bi-asterisk"></i><b>{{ $project->category }}</b></div>@endif<a href="{{ $project->link ?: '#kontak' }}" {{ $project->link ? 'target=_blank rel=noreferrer' : '' }} class="project-open" aria-label="Buka {{ $project->title }}"><i class="bi bi-arrow-up-right"></i></a></div><div class="project-meta"><div><span>{{ $project->category }}</span><h3>{{ $project->title }}</h3></div><i class="bi bi-arrow-up-right"></i></div><p class="project-description">{{ $project->description }}</p></article>@empty<div class="empty-project"><i class="bi bi-camera"></i><h3>Ruang untuk karya berikutnya</h3><p>Proyek baru akan muncul di sini. Punya ide? Mari kita wujudkan.</p></div>@endforelse</div>@if($projects->hasPages())<div class="portfolio-page-footer"><span>Menampilkan {{ $projects->firstItem() }}–{{ $projects->lastItem() }} dari {{ $projects->total() }} proyek</span>{{ $projects->links('pagination.portfolio') }}</div>@endif</div></section>
 @include('partials.services')
-<section class="section container skills-section" id="keahlian"><div class="section-label"><span>04 / YANG SAYA KERJAKAN</span><i></i></div><div class="skills-grid"><div><h2>Menyatukan <em>kreativitas</em> dan fungsi.</h2><p class="muted">Dari konsep hingga publikasi, saya membantu ide tumbuh menjadi karya yang siap dinikmati.</p></div><div class="skill-list"><div><span>01</span><h3>Web Development</h3><i class="bi bi-code-slash"></i></div><div><span>02</span><h3>Konten Digital</h3><i class="bi bi-camera-video"></i></div><div><span>03</span><h3>Creative Direction</h3><i class="bi bi-lightbulb"></i></div><div><span>04</span><h3>Social Media</h3><i class="bi bi-chat-heart"></i></div></div></div></section>
+<section class="section container skills-section" id="keahlian"><div class="section-label"><span>04 / KEAHLIAN SAYA</span><i></i></div><div class="skills-grid"><div><h2>Menyatukan <em>kreativitas</em> dan fungsi.</h2><p class="muted">Kumpulan kemampuan teknis dan interpersonal yang mendukung setiap karya.</p></div><div class="public-skill-groups">@foreach(['hard' => 'Hard skill', 'soft' => 'Soft skill'] as $type => $title)<div class="public-skill-group"><h3>{{ $title }}</h3>@forelse($skills->get($type, collect()) as $skill)<div class="public-skill"><div><span>{{ $skill->name }}</span><small>{{ $skill->level }}%</small></div><div class="skill-meter"><i style="width: {{ $skill->level }}%"></i></div></div>@empty<p class="muted">Keahlian akan segera ditambahkan.</p>@endforelse</div>@endforeach</div></div></section>
 <section class="cv-section" id="cv"><div class="container cv-inner"><div><div class="section-label"><span>05 / RINGKASAN PROFESIONAL</span><i></i></div><h2>Perjalanan saya,<br><em>dalam satu halaman.</em></h2><p>Unduh CV untuk melihat pengalaman, keahlian, dan informasi profesional saya.</p></div>@if($cvPath)<a class="button button-light" href="{{ asset('storage/'.$cvPath) }}" target="_blank">Unduh CV <i class="bi bi-download"></i></a>@else<a class="button button-light" href="#kontak">Minta CV <i class="bi bi-arrow-up-right"></i></a>@endif</div></section>
 <section class="section container contact-section" id="kontak"><div class="section-label"><span>06 / KATAKAN HALO</span><i></i></div><div class="contact-grid"><h2>Ada ide menarik?<br><em>Saya siap mendengar.</em></h2><div><p>Ceritakan sedikit tentang proyek atau kolaborasi yang sedang Anda bayangkan.</p>@if($errors->has('message'))<p role="alert" style="color:#a63e2d">{{ $errors->first('message') }}</p>@endif<form action="{{ route('contact.send') }}" method="POST" class="contact-form">@csrf<div class="form-row"><label>Nama<input name="name" required placeholder="Nama Anda" value="{{ old('name') }}"></label><label>Email<input type="email" name="email" required placeholder="nama@email.com" value="{{ old('email') }}"></label></div><label>Pesan<textarea name="message" rows="3" required placeholder="Ceritakan ide Anda...">{{ old('message') }}</textarea></label><button class="button button-dark" type="submit">Kirim pesan <i class="bi bi-arrow-up-right"></i></button></form></div></div></section>
-</main><footer class="footer"><div class="container footer-inner"><a class="brand" href="#home">NA<span>.</span></a><p>Dirancang dan dibuat dengan rasa ingin tahu.</p><span>© {{ date('Y') }} Nadhim Alim</span><a href="{{ route('admin.login') }}" class="admin-link">Admin</a></div></footer>
+</main>
+<footer class="site-footer">
+    <div class="container footer-main">
+        <div class="footer-callout">
+            <div><span class="footer-eyebrow">ADA IDE YANG INGIN DIWUJUDKAN?</span><h2>Mari buat sesuatu<br><em>yang bermakna.</em></h2></div>
+            <a class="footer-contact" href="#kontak">Mulai percakapan <i class="bi bi-arrow-up-right"></i></a>
+        </div>
+        <div class="footer-columns">
+            <div class="footer-about"><a class="brand" href="#home">NA<span>.</span></a><p>Kreator digital dan web developer. Merancang pengalaman digital yang berguna dan berkesan.</p></div>
+            <div class="footer-column"><span class="footer-label">JELAJAHI</span><a href="#tentang">Tentang saya</a><a href="#karya">Portofolio</a><a href="#layanan">Layanan</a><a href="#keahlian">Keahlian</a></div>
+            <div class="footer-column"><span class="footer-label">TERHUBUNG</span>
+                @if(config('portfolio.instagram_url'))<a href="{{ config('portfolio.instagram_url') }}" target="_blank" rel="noreferrer">Instagram <i class="bi bi-arrow-up-right"></i></a>@endif
+                @if(config('portfolio.youtube_url'))<a href="{{ config('portfolio.youtube_url') }}" target="_blank" rel="noreferrer">YouTube <i class="bi bi-arrow-up-right"></i></a>@endif
+                @if(config('portfolio.tiktok_url'))<a href="{{ config('portfolio.tiktok_url') }}" target="_blank" rel="noreferrer">TikTok <i class="bi bi-arrow-up-right"></i></a>@endif
+                <a href="{{ route('admin.login') }}">Admin <i class="bi bi-box-arrow-in-right"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom"><span>© {{ date('Y') }} Nadhim Alim</span><span>Dirancang dengan rasa ingin tahu <i class="bi bi-sparkle"></i></span><a href="#home">Kembali ke atas <i class="bi bi-arrow-up"></i></a></div>
+    </div>
+</footer>
 </body></html>
+
 
 
