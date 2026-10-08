@@ -11,6 +11,8 @@ use App\Models\Education;
 use App\Models\News;
 use App\Models\WorkTask;
 use App\Models\ProjectPayment;
+use App\Models\MarketplaceProduct;
+use App\Models\MarketplaceOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -78,6 +80,8 @@ class AdminController extends Controller
             ],
             'workTasks' => WorkTask::with('payments')->orderBy('scheduled_at')->get(),
             'midtransConfigured' => filled(config('services.midtrans.server_key')) && filled(config('services.midtrans.client_key')),
+            'marketplaceProducts' => MarketplaceProduct::orderBy('sort_order')->orderByDesc('created_at')->get(),
+            'marketplaceOrders' => MarketplaceOrder::latest()->get(),
             'upcomingTaskCount' => WorkTask::where('status', '!=', 'done')->where('scheduled_at', '>=', now())->count(),
             'overdueDeadlineCount' => WorkTask::where('status', '!=', 'done')->whereNotNull('deadline_at')->where('deadline_at', '<', now())->count(),
             'nearDeadlineCount' => WorkTask::where('status', '!=', 'done')->whereBetween('deadline_at', [now(), now()->copy()->addDays(3)])->count(),
@@ -195,7 +199,7 @@ class AdminController extends Controller
             abort(500, 'File backup tidak dapat dibuat.');
         }
 
-        $backup = ['format' => 'nadhim-portfolio-backup', 'version' => 1, 'created_at' => now()->toIso8601String(), 'projects' => [], 'news' => [], 'work_tasks' => [], 'project_payments' => []];
+        $backup = ['format' => 'nadhim-portfolio-backup', 'version' => 1, 'created_at' => now()->toIso8601String(), 'projects' => [], 'news' => [], 'work_tasks' => [], 'project_payments' => [], 'marketplace_products' => [], 'marketplace_orders' => []];
         foreach (Project::orderBy('id')->get() as $project) {
             $backup['projects'][] = $this->backupRow($project->getAttributes(), $project->image, 'projects', $zip);
         }
@@ -204,6 +208,10 @@ class AdminController extends Controller
         }
         $backup['work_tasks'] = WorkTask::orderBy('id')->get()->map(fn ($task) => $task->getAttributes())->all();
         $backup['project_payments'] = ProjectPayment::orderBy('id')->get()->map(fn ($payment) => $payment->getAttributes())->all();
+        foreach (MarketplaceProduct::orderBy('id')->get() as $product) {
+            $backup['marketplace_products'][] = $this->backupRow($product->getAttributes(), $product->image, 'marketplace', $zip);
+        }
+        $backup['marketplace_orders'] = MarketplaceOrder::orderBy('id')->get()->map(fn ($order) => $order->getAttributes())->all();
         $zip->addFromString('backup.json', json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
         $zip->close();
 
@@ -246,10 +254,16 @@ class AdminController extends Controller
             if (!is_array($backup['project_payments']) || count($backup['project_payments']) > 10000) {
                 return back()->withErrors(['backup' => 'Struktur data pembayaran dalam backup tidak valid.']);
             }
+            $backup['marketplace_products'] ??= [];
+            $backup['marketplace_orders'] ??= [];
+            if (!is_array($backup['marketplace_products']) || !is_array($backup['marketplace_orders']) || count($backup['marketplace_products']) > 10000 || count($backup['marketplace_orders']) > 10000) {
+                return back()->withErrors(['backup' => 'Struktur data marketplace dalam backup tidak valid.']);
+            }
 
             $counts = DB::transaction(function () use ($backup, $zip) {
-                $counts = ['projects' => 0, 'news' => 0, 'work_tasks' => 0, 'project_payments' => 0];
+                $counts = ['projects' => 0, 'news' => 0, 'work_tasks' => 0, 'project_payments' => 0, 'marketplace_products' => 0, 'marketplace_orders' => 0];
                 $taskMap = [];
+                $productMap = [];
                 foreach ($backup['projects'] as $row) {
                     $this->validateBackupRow($row, ['title' => 'required|string|max:255', 'category' => 'required|string|max:100', 'description' => 'required|string|max:3000', 'link' => 'nullable|url|max:2048', 'sort_order' => 'nullable|integer|min:0']);
                     $model = Project::firstOrCreate(
@@ -298,10 +312,44 @@ class AdminController extends Controller
                     ]);
                     $counts['project_payments'] += (int) $model->wasRecentlyCreated;
                 }
+                foreach ($backup['marketplace_products'] as $row) {
+                    $this->validateBackupRow($row, [
+                        'name' => 'required|string|max:180', 'slug' => 'required|string|max:255', 'category' => 'nullable|string|max:100',
+                        'description' => 'required|string|max:5000', 'price' => 'required|integer|min:1000', 'stock' => 'required|integer|min:0',
+                        'is_active' => 'required|boolean', 'sort_order' => 'nullable|integer|min:0',
+                    ]);
+                    $model = MarketplaceProduct::firstOrCreate(['slug' => $row['slug']], collect($row)->only(['name', 'category', 'description', 'price', 'stock', 'is_active', 'sort_order'])->all());
+                    $productMap[(string) ($row['id'] ?? '')] = $model->id;
+                    $counts['marketplace_products'] += (int) $model->wasRecentlyCreated;
+                    $this->restoreBackupImage($zip, $row, $model, 'marketplace');
+                }
+                foreach ($backup['marketplace_orders'] as $row) {
+                    $this->validateBackupRow($row, [
+                        'marketplace_product_id' => 'nullable|integer|min:1', 'public_token' => 'required|string|max:64', 'order_id' => 'required|string|max:64',
+                        'product_name' => 'required|string|max:255', 'unit_price' => 'required|integer|min:1', 'quantity' => 'required|integer|min:1',
+                        'total_amount' => 'required|integer|min:1', 'customer_name' => 'required|string|max:120', 'customer_email' => 'nullable|email|max:190',
+                        'customer_phone' => 'required|string|max:30', 'shipping_address' => 'required|string|max:1500',
+                        'status' => 'required|string|max:30', 'payment_status' => 'required|string|max:30', 'snap_token' => 'nullable|string|max:255',
+                        'redirect_url' => 'nullable|url|max:2048', 'transaction_id' => 'nullable|string|max:255', 'payment_type' => 'nullable|string|max:80',
+                        'notification_payload' => 'nullable|array', 'paid_at' => 'nullable|date',
+                    ]);
+                    $productId = isset($row['marketplace_product_id']) ? ($productMap[(string) $row['marketplace_product_id']] ?? null) : null;
+                    $model = MarketplaceOrder::firstOrCreate(['order_id' => $row['order_id']], [
+                        'marketplace_product_id' => $productId, 'public_token' => $row['public_token'], 'product_name' => $row['product_name'],
+                        'unit_price' => $row['unit_price'], 'quantity' => $row['quantity'], 'total_amount' => $row['total_amount'],
+                        'customer_name' => $row['customer_name'], 'customer_email' => $row['customer_email'] ?? null, 'customer_phone' => $row['customer_phone'],
+                        'shipping_address' => $row['shipping_address'], 'status' => $row['status'], 'payment_status' => $row['payment_status'],
+                        'snap_token' => $row['snap_token'] ?? null, 'redirect_url' => $row['redirect_url'] ?? null,
+                        'transaction_id' => $row['transaction_id'] ?? null, 'payment_type' => $row['payment_type'] ?? null,
+                        'notification_payload' => $row['notification_payload'] ?? null, 'paid_at' => $row['paid_at'] ?? null,
+                        'created_at' => $row['created_at'] ?? now(), 'updated_at' => $row['updated_at'] ?? now(),
+                    ]);
+                    $counts['marketplace_orders'] += (int) $model->wasRecentlyCreated;
+                }
                 return $counts;
             });
 
-            return back()->with('success', 'Pemulihan selesai. Ditambahkan ' . $counts['projects'] . ' proyek, ' . $counts['news'] . ' berita, ' . $counts['work_tasks'] . ' agenda, dan ' . $counts['project_payments'] . ' riwayat pembayaran baru. Data yang sudah ada tidak ditimpa.');
+            return back()->with('success', 'Pemulihan selesai. Ditambahkan ' . $counts['projects'] . ' proyek, ' . $counts['news'] . ' berita, ' . $counts['work_tasks'] . ' agenda, ' . $counts['project_payments'] . ' riwayat pembayaran proyek, ' . $counts['marketplace_products'] . ' barang, dan ' . $counts['marketplace_orders'] . ' pesanan marketplace. Data yang sudah ada tidak ditimpa.');
         } finally {
             $zip->close();
         }
@@ -314,7 +362,7 @@ class AdminController extends Controller
         }
     }
 
-    private function restoreBackupImage(\ZipArchive $zip, array $row, Project|News $model, string $directory): void
+    private function restoreBackupImage(\ZipArchive $zip, array $row, Project|News|MarketplaceProduct $model, string $directory): void
     {
         $originalPath = $row['_image_path'] ?? null;
         $entry = $row['_image_entry'] ?? null;

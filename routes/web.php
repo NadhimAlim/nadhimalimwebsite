@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\MarketplaceController;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -13,12 +14,16 @@ Route::get('/berita/{news}', [HomeController::class, 'showNews'])->name('news.sh
 Route::post('/contact', [HomeController::class, 'contact'])->name('contact.send');
 Route::get('/pembayaran/{payment:public_token}', [\App\Http\Controllers\PaymentController::class, 'show'])->name('payments.show');
 Route::post('/midtrans/notification', [\App\Http\Controllers\PaymentController::class, 'notification'])->name('midtrans.notification');
+Route::get('/toko', [MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/toko/{product:slug}', [MarketplaceController::class, 'show'])->name('marketplace.show');
+Route::post('/toko/{product:slug}/pesan', [MarketplaceController::class, 'order'])->middleware('throttle:10,1')->name('marketplace.order');
+Route::get('/pesanan/{order:public_token}', [MarketplaceController::class, 'checkout'])->name('marketplace.checkout');
 
 Route::get('/admin', [AdminController::class, 'login'])->name('admin.login');
 Route::post('/admin/login', [AdminController::class, 'authenticate'])->middleware('throttle:5,1')->name('admin.authenticate');
 Route::middleware('portfolio.admin')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/dashboard/{section}', [AdminController::class, 'dashboard'])->whereIn('section', ['packages', 'projects', 'messages', 'profile', 'education', 'news', 'profile-photo', 'cv-panel', 'account', 'schedule', 'data-backup'])->name('dashboard.section');
+    Route::get('/dashboard/{section}', [AdminController::class, 'dashboard'])->whereIn('section', ['packages', 'projects', 'messages', 'profile', 'education', 'news', 'profile-photo', 'cv-panel', 'account', 'schedule', 'data-backup', 'marketplace'])->name('dashboard.section');
     Route::put('/account/profile', [AdminController::class, 'updateAdminProfile'])->name('account.profile.update');
     Route::put('/account/password', [AdminController::class, 'changeAdminPassword'])->name('account.password.update');
     Route::post('/work-tasks', [AdminController::class, 'storeWorkTask'])->name('work-tasks.store');
@@ -29,6 +34,10 @@ Route::middleware('portfolio.admin')->prefix('admin')->name('admin.')->group(fun
     Route::get('/backup/download', [AdminController::class, 'downloadBackup'])->name('backup.download');
     Route::post('/backup/restore', [AdminController::class, 'restoreBackup'])->name('backup.restore');
     Route::post('/projects', [AdminController::class, 'storeProject'])->name('projects.store');
+    Route::post('/marketplace/products', [MarketplaceController::class, 'store'])->name('marketplace.products.store');
+    Route::put('/marketplace/products/{product}', [MarketplaceController::class, 'update'])->name('marketplace.products.update');
+    Route::delete('/marketplace/products/{product}', [MarketplaceController::class, 'destroy'])->name('marketplace.products.destroy');
+    Route::put('/marketplace/orders/{order}', [MarketplaceController::class, 'updateOrder'])->name('marketplace.orders.update');
     Route::put('/projects/{project}', [AdminController::class, 'updateProject'])->name('projects.update');
     Route::delete('/projects/{project}', [AdminController::class, 'deleteProject'])->name('projects.delete');
     Route::post('/services', [AdminController::class, 'storeService'])->name('services.store');
