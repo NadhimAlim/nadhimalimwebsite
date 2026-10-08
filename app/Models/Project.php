@@ -9,7 +9,7 @@ class Project extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'category', 'description', 'image', 'link'];
+    protected $fillable = ['title', 'category', 'description', 'image', 'link', 'sort_order'];
 
     protected function casts(): array
     {

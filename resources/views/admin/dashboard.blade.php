@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ asset('css/portfolio.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin-polish.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/feedback.css') }}">
 </head>
 <body class="admin-body">
 <div class="dashboard-layout">
@@ -17,18 +18,23 @@
         <div class="sidebar-caption">WORKSPACE</div>
         <a class="sidebar-link {{ $section === 'overview' ? 'active' : '' }}" href="{{ route('admin.dashboard') }}"><i class="bi bi-grid-1x2"></i> Ringkasan</a>
         <a class="sidebar-link {{ $section === 'packages' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'packages') }}"><i class="bi bi-box-seam"></i> Paket jasa</a>
-        <a class="sidebar-link {{ $section === 'skills' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'skills') }}"><i class="bi bi-stars"></i> Keahlian</a>
+        <a class="sidebar-link {{ $section === 'messages' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'messages') }}"><i class="bi bi-envelope"></i> Pesan masuk @if($unreadMessageCount)<span class="sidebar-badge">{{ $unreadMessageCount }}</span>@endif</a>
         <a class="sidebar-link {{ $section === 'projects' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'projects') }}"><i class="bi bi-images"></i> Portofolio</a>
+        <a class="sidebar-link {{ $section === 'profile' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'profile') }}"><i class="bi bi-person-lines-fill"></i> Konten profil</a>
+        <a class="sidebar-link {{ $section === 'education' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'education') }}"><i class="bi bi-mortarboard"></i> Pendidikan</a>
+        <a class="sidebar-link {{ $section === 'news' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'news') }}"><i class="bi bi-newspaper"></i> Berita</a>
+        <a class="sidebar-link {{ $section === 'schedule' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'schedule') }}"><i class="bi bi-calendar3"></i> Jadwal kerja @if($upcomingTaskCount)<span class="sidebar-badge">{{ $upcomingTaskCount }}</span>@endif</a>
+        <a class="sidebar-link {{ $section === 'data-backup' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'data-backup') }}"><i class="bi bi-database-down"></i> Data & backup</a>
         <a class="sidebar-link {{ $section === 'profile-photo' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'profile-photo') }}"><i class="bi bi-person-bounding-box"></i> Foto profil</a>
         <a class="sidebar-link {{ $section === 'cv-panel' ? 'active' : '' }}" href="{{ route('admin.dashboard.section', 'cv-panel') }}"><i class="bi bi-file-earmark-person"></i> Dokumen CV</a>
         <div class="sidebar-bottom">
-            <div class="admin-profile"><div class="admin-avatar">NA</div><div><strong>Nadhim Alim</strong><span>Administrator</span></div></div>
+            <a class="admin-profile" href="{{ route('admin.dashboard.section', 'account') }}" aria-label="Ubah profil admin {{ $adminProfile['name'] }}"><div class="admin-avatar">@if($adminProfile['photo'])<img src="{{ asset('storage/'.$adminProfile['photo']) }}" alt="">@else{{ strtoupper(substr($adminProfile['name'], 0, 2)) }}@endif</div><div><strong>{{ $adminProfile['name'] }}</strong><span>Administrator</span></div></a>
             <form action="{{ route('admin.logout') }}" method="POST">@csrf<button class="sidebar-logout" type="submit"><i class="bi bi-box-arrow-left"></i> Keluar</button></form>
         </div>
     </aside>
 
     <main class="dashboard-main" id="overview">
-        @php($sectionTitles = ['overview' => 'Ringkasan', 'packages' => 'Paket jasa', 'skills' => 'Keahlian', 'projects' => 'Portofolio', 'profile-photo' => 'Foto profil', 'cv-panel' => 'Dokumen CV'])
+        @php($sectionTitles = ['overview' => 'Ringkasan', 'packages' => 'Paket jasa', 'messages' => 'Pesan masuk', 'projects' => 'Portofolio', 'profile' => 'Konten profil', 'education' => 'Pendidikan', 'news' => 'Berita', 'profile-photo' => 'Foto profil', 'cv-panel' => 'Dokumen CV', 'account' => 'Profil admin', 'schedule' => 'Jadwal kerja', 'data-backup' => 'Data & backup'])
         <header class="dashboard-header"><div><span class="dashboard-breadcrumb">Workspace <i class="bi bi-chevron-right"></i> {{ $sectionTitles[$section] }}</span><h1>{{ $sectionTitles[$section] }}</h1><p>Kelola {{ $section === 'overview' ? 'layanan, karya, dan dokumen profesional Anda' : strtolower($sectionTitles[$section]) . ' portofolio Anda' }}.</p></div><a href="{{ route('home') }}" class="view-site" target="_blank"><i class="bi bi-box-arrow-up-right"></i> Lihat situs</a></header>
 
         @if(session('success'))
@@ -39,24 +45,36 @@
         @endif
 
         @if($section === 'overview')
-        <section class="dashboard-metrics">
-            <article class="metric-card"><span>Total proyek</span><div><strong>{{ $projects->count() }}</strong><i class="bi bi-images"></i></div><small>Karya di portofolio</small></article>
-            <article class="metric-card"><span>Paket jasa</span><div><strong>{{ $services->count() }}</strong><i class="bi bi-box-seam"></i></div><small>Layanan yang ditawarkan</small></article>
-            <article class="metric-card"><span>CV profesional</span><div><strong>{{ $cvPath ? 'Siap' : '—' }}</strong><i class="bi bi-file-earmark-check"></i></div><small>{{ $cvPath ? 'Tersedia untuk pengunjung' : 'Belum ada dokumen' }}</small></article>
+        <section class="dashboard-metrics overview-metrics">
+            <article class="metric-card"><span>Total proyek</span><div><strong>{{ $projects->count() }}</strong><i class="bi bi-images"></i></div><small>Karya di portofolio</small><a class="metric-link" href="{{ route('admin.dashboard.section', 'projects') }}">Kelola karya <i class="bi bi-arrow-right"></i></a></article>
+            <article class="metric-card"><span>Pesan belum dibaca</span><div><strong>{{ $unreadMessageCount }}</strong><i class="bi bi-envelope"></i></div><small>{{ $contactMessages->count() }} pesan total</small><a class="metric-link" href="{{ route('admin.dashboard.section', 'messages') }}">Buka pesan <i class="bi bi-arrow-right"></i></a></article>
+            <article class="metric-card"><span>Agenda mendatang</span><div><strong>{{ $upcomingTaskCount }}</strong><i class="bi bi-calendar-check"></i></div><small>Jadwal kerja aktif</small><a class="metric-link" href="{{ route('admin.dashboard.section', 'schedule') }}">Lihat jadwal <i class="bi bi-arrow-right"></i></a></article>
+            <article class="metric-card {{ $overdueDeadlineCount ? 'metric-urgent' : '' }}"><span>Deadline perlu perhatian</span><div><strong>{{ $overdueDeadlineCount + $nearDeadlineCount }}</strong><i class="bi bi-alarm"></i></div><small>{{ $overdueDeadlineCount }} terlambat · {{ $nearDeadlineCount }} dalam 3 hari</small><a class="metric-link" href="{{ route('admin.dashboard.section', 'schedule') }}">Periksa deadline <i class="bi bi-arrow-right"></i></a></article>
         </section>
-        <section class="skill-summary-grid">
-            @foreach(['hard' => 'Hard skill', 'soft' => 'Soft skill'] as $type => $title)
-                @php($skillGroup = $skills->where('type', $type))
-                <article class="skill-summary-card">
-                    <div class="skill-summary-heading"><div><span class="panel-kicker">KEAHLIAN</span><h2>{{ $title }}</h2></div><span class="panel-count">{{ $skillGroup->count() }}</span></div>
-                    @forelse($skillGroup as $skill)
-                        <div class="skill-summary-item"><span>{{ $skill->name }}</span><strong>{{ $skill->level }}%</strong></div>
-                    @empty
-                        <p class="admin-sub">Belum ada {{ strtolower($title) }}.</p>
-                    @endforelse
-                    <a class="skill-summary-link" href="{{ route('admin.dashboard.section', 'skills') }}">Kelola keahlian <i class="bi bi-arrow-right"></i></a>
-                </article>
-            @endforeach
+        <section class="overview-tools-grid">
+            <article class="overview-clock-card"><span class="panel-kicker">WAKTU SEKARANG</span><strong data-live-clock>--:--:--</strong><span data-live-date></span><small>Waktu Indonesia Barat · WIB</small></article>
+            <article class="overview-calendar-card"><div class="overview-calendar-heading"><div><span class="panel-kicker">KALENDER</span><h2 data-overview-month></h2></div><div><button type="button" data-overview-prev aria-label="Bulan sebelumnya"><i class="bi bi-chevron-left"></i></button><button type="button" data-overview-next aria-label="Bulan berikutnya"><i class="bi bi-chevron-right"></i></button></div></div><div class="overview-calendar-grid" data-overview-calendar></div><div class="overview-calendar-legend"><i></i> Ada agenda kerja</div></article>
+        </section>
+        <div class="overview-calendar-source" aria-hidden="true">@foreach($workTasks->where('status', '!=', 'done') as $task)<span data-date="{{ $task->scheduled_at->toDateString() }}"></span>@endforeach</div>
+        <section class="admin-panel dashboard-panel"><div class="panel-heading"><div><span class="panel-kicker">PEKERJAAN PRIBADI</span><h2>Jadwal proyek</h2><p>{{ $upcomingTaskCount }} agenda mendatang</p></div><a class="admin-button" href="{{ route('admin.dashboard.section', 'schedule') }}"><i class="bi bi-calendar3"></i> Atur jadwal</a></div>
+            <div class="schedule-quick-list">@forelse($workTasks->where('status', '!=', 'done')->take(3) as $task)<article><strong>{{ $task->title }}</strong><span>{{ $task->scheduled_at->format('d M Y, H:i') }}@if($task->client) · {{ $task->client }}@endif</span></article>@empty<p class="admin-sub">Belum ada jadwal aktif. Tambahkan agenda proyek agar pekerjaan lebih teratur.</p>@endforelse</div>
+        </section>
+        @endif
+
+        @if($section === 'messages')
+        <section class="admin-panel dashboard-panel">
+            <div class="panel-heading"><div><span class="panel-kicker">FORMULIR KONTAK</span><h2>Pesan dari pengunjung</h2><p>Pesan yang dikirim dari bagian “Katakan Halo” di halaman utama.</p></div><span class="panel-count">{{ $contactMessages->count() }} pesan</span></div>
+            <div class="contact-message-list">
+                @forelse($contactMessages as $contactMessage)
+                    <article class="contact-message-card {{ $contactMessage->is_read ? 'is-read' : 'is-unread' }}">
+                        <div class="contact-message-heading"><div><span class="message-state {{ $contactMessage->is_read ? 'read' : 'unread' }}">{{ $contactMessage->is_read ? 'Sudah dibaca' : 'Belum dibaca' }}</span><h3>{{ $contactMessage->name }}</h3><a href="mailto:{{ $contactMessage->email }}">{{ $contactMessage->email }}</a></div><time datetime="{{ $contactMessage->created_at->toIso8601String() }}">{{ $contactMessage->created_at->format('d M Y, H:i') }}</time></div>
+                        <p>{{ $contactMessage->message }}</p>
+                        <div class="message-actions"><form action="{{ route('admin.messages.status', $contactMessage) }}" method="POST">@csrf @method('PUT')<input type="hidden" name="is_read" value="{{ $contactMessage->is_read ? 0 : 1 }}"><button class="admin-button message-status-button" type="submit"><i class="bi {{ $contactMessage->is_read ? 'bi-envelope' : 'bi-envelope-check' }}"></i> Tandai {{ $contactMessage->is_read ? 'belum dibaca' : 'sudah dibaca' }}</button></form><form action="{{ route('admin.messages.delete', $contactMessage) }}" method="POST" data-confirm="Hapus pesan ini? Tindakan ini tidak dapat dibatalkan.">@csrf @method('DELETE')<button class="admin-button danger" type="submit"><i class="bi bi-trash3"></i> Hapus pesan</button></form></div>
+                    </article>
+                @empty
+                    <p class="admin-sub">Belum ada pesan. Pesan dari formulir kontak akan muncul di sini.</p>
+                @endforelse
+            </div>
         </section>
         @endif
 
@@ -76,7 +94,7 @@
                             <input type="hidden" name="icon" value="{{ $service->icon }}">
                             <button class="admin-button" type="submit"><i class="bi bi-check2"></i> Simpan perubahan</button>
                         </form>
-                        <form action="{{ route('admin.services.delete', $service) }}" method="POST" class="service-delete-form" onsubmit="return confirm('Hapus paket jasa ini?')">@csrf @method('DELETE')<button type="submit" aria-label="Hapus {{ $service->title }}"><i class="bi bi-trash3"></i></button></form>
+                        <form action="{{ route('admin.services.delete', $service) }}" method="POST" class="service-delete-form" data-confirm="Hapus paket jasa ini? Tindakan ini tidak dapat dibatalkan.">@csrf @method('DELETE')<button type="submit" aria-label="Hapus {{ $service->title }}"><i class="bi bi-trash3"></i></button></form>
                     </article>
                 @endforeach
             </div>
@@ -94,33 +112,26 @@
         </section>
         @endif
 
-        @if($section === 'skills')
-        <section class="admin-panel dashboard-panel" id="skills">
-            <div class="panel-heading"><div><span class="panel-kicker">KEMAMPUAN PROFESIONAL</span><h2>Soft skill & hard skill</h2><p>Tambahkan keahlian dan tingkat penguasaan yang akan tampil di halaman portofolio.</p></div><span class="panel-count">{{ $skills->count() }} keahlian</span></div>
-            <form class="admin-form project-create-form" action="{{ route('admin.skills.store') }}" method="POST">
+        @if($section === 'profile')
+        <section class="admin-panel dashboard-panel">
+            <div class="panel-heading"><div><span class="panel-kicker">TAMPILAN HALAMAN UTAMA</span><h2>Konten profil</h2><p>Ubah teks perkenalan dan bagian tentang saya. Perubahan baru aktif setelah dipublikasikan.</p></div></div>
+            <form class="admin-form profile-content-form" action="{{ route('admin.profile.preview') }}" method="POST" data-loading-title="Menyiapkan pratinjau..." data-loading-description="Menyusun tampilan halaman utama.">
                 @csrf
-                <label>Nama keahlian<input name="name" required maxlength="100" placeholder="Contoh: Laravel atau Komunikasi"></label>
-                <label>Jenis keahlian<select name="type" required><option value="hard">Hard skill</option><option value="soft">Soft skill</option></select></label>
-                <label>Tingkat penguasaan (%)<input name="level" type="number" min="1" max="100" value="80" required></label>
-                <button class="admin-button" type="submit"><i class="bi bi-plus-lg"></i> Tambahkan keahlian</button>
+                <label>Kalimat perkenalan<input name="hero_intro" maxlength="120" required value="{{ old('hero_intro', $profileContent['hero_intro']) }}"></label>
+                <label class="wide">Judul utama<input name="hero_title" maxlength="180" required value="{{ old('hero_title', $profileContent['hero_title']) }}"></label>
+                <label class="wide">Deskripsi singkat<textarea name="hero_description" rows="3" maxlength="500" required>{{ old('hero_description', $profileContent['hero_description']) }}</textarea></label>
+                <label class="wide">Judul bagian tentang saya<input name="about_title" maxlength="180" required value="{{ old('about_title', $profileContent['about_title']) }}"></label>
+                <label class="wide">Paragraf pertama<textarea name="about_paragraph_1" rows="3" maxlength="1000" required>{{ old('about_paragraph_1', $profileContent['about_paragraph_1']) }}</textarea></label>
+                <label class="wide">Paragraf kedua<textarea name="about_paragraph_2" rows="3" maxlength="1000" required>{{ old('about_paragraph_2', $profileContent['about_paragraph_2']) }}</textarea></label>
+                <div class="social-settings-heading"><span class="panel-kicker">TAUTAN MEDIA SOSIAL</span><p>Kosongkan jika akun tidak ingin ditampilkan.</p></div>
+                <label>YouTube<input type="url" name="youtube_url" maxlength="2048" value="{{ old('youtube_url', $profileContent['youtube_url']) }}" placeholder="https://youtube.com/@username"></label>
+                <label>Instagram<input type="url" name="instagram_url" maxlength="2048" value="{{ old('instagram_url', $profileContent['instagram_url']) }}" placeholder="https://instagram.com/username"></label>
+                <label class="wide">TikTok<input type="url" name="tiktok_url" maxlength="2048" value="{{ old('tiktok_url', $profileContent['tiktok_url']) }}" placeholder="https://tiktok.com/@username"></label>
+                <button class="admin-button" type="submit"><i class="bi bi-eye"></i> Lihat pratinjau</button>
             </form>
-            <div class="admin-project-list skill-admin-list">
-                @forelse($skills as $skill)
-                    <form class="skill-admin-row" action="{{ route('admin.skills.update', $skill) }}" method="POST">
-                        @csrf @method('PUT')
-                        <label>Nama<input name="name" required maxlength="100" value="{{ $skill->name }}"></label>
-                        <label>Jenis<select name="type"><option value="hard" @selected($skill->type === 'hard')>Hard skill</option><option value="soft" @selected($skill->type === 'soft')>Soft skill</option></select></label>
-                        <label>Penguasaan %<input name="level" type="number" min="1" max="100" value="{{ $skill->level }}" required></label>
-                        <button class="admin-button" type="submit"><i class="bi bi-check2"></i> Simpan</button>
-                        <button class="admin-button danger" type="submit" form="delete-skill-{{ $skill->id }}" onclick="return confirm('Hapus keahlian ini?')"><i class="bi bi-trash3"></i> Hapus</button>
-                    </form>
-                    <form id="delete-skill-{{ $skill->id }}" action="{{ route('admin.skills.delete', $skill) }}" method="POST">@csrf @method('DELETE')</form>
-                @empty
-                    <p class="admin-sub">Belum ada keahlian. Tambahkan soft skill atau hard skill melalui formulir di atas.</p>
-                @endforelse
-            </div>
         </section>
         @endif
+
 
         @if($section === 'projects')
         <section class="admin-panel dashboard-panel" id="projects">
@@ -134,9 +145,10 @@
                 <label>Gambar sampul<input name="image" type="file" accept="image/jpeg,image/png,image/webp"><span class="admin-sub">JPG, PNG, atau WebP · maks. 5 MB</span></label>
                 <button class="admin-button" type="submit"><i class="bi bi-cloud-arrow-up"></i> Terbitkan proyek</button>
             </form>
+            <label class="admin-search"><i class="bi bi-search"></i><input type="search" data-admin-search="projects" placeholder="Cari nama proyek atau kategori..."></label><p class="admin-sub search-empty" data-search-empty="projects" hidden>Tidak ada proyek yang cocok.</p>
             <div class="admin-project-list">
                 @forelse($projects as $project)
-                    <article class="admin-project-entry">
+                    <article class="admin-project-entry" data-search-item="projects">
                     <div class="admin-project">
                         @if($project->image)
                             <img src="{{ asset('storage/'.$project->image) }}" alt="">
@@ -144,6 +156,7 @@
                             <div class="project-placeholder"><i class="bi bi-image"></i></div>
                         @endif
                         <div class="admin-project-info"><strong>{{ $project->title }}</strong><span>{{ $project->category }} · {{ $project->created_at->format('d M Y') }}</span></div>
+                        <div class="project-order-controls"><form action="{{ route('admin.projects.order', $project) }}" method="POST">@csrf @method('PATCH')<input type="hidden" name="direction" value="up"><button type="submit" aria-label="Naikkan {{ $project->title }}" @disabled($loop->first)><i class="bi bi-arrow-up"></i></button></form><form action="{{ route('admin.projects.order', $project) }}" method="POST">@csrf @method('PATCH')<input type="hidden" name="direction" value="down"><button type="submit" aria-label="Turunkan {{ $project->title }}" @disabled($loop->last)><i class="bi bi-arrow-down"></i></button></form></div>
                         <details class="project-actions"><summary class="admin-button"><i class="bi bi-pencil-square"></i> Edit</summary>
                             <form class="admin-form project-edit-form" action="{{ route('admin.projects.update', $project) }}" method="POST" enctype="multipart/form-data">
                                 @csrf @method('PUT')
@@ -155,11 +168,67 @@
                                 <button type="submit" class="admin-button"><i class="bi bi-check2"></i> Simpan perubahan</button>
                             </form>
                         </details>
-                        <form action="{{ route('admin.projects.delete', $project) }}" method="POST" onsubmit="return confirm('Hapus proyek ini?')">@csrf @method('DELETE')<button type="submit" class="admin-button danger"><i class="bi bi-trash3"></i> Hapus</button></form>
+                        <form action="{{ route('admin.projects.delete', $project) }}" method="POST" data-confirm="Hapus proyek ini? Tindakan ini tidak dapat dibatalkan.">@csrf @method('DELETE')<button type="submit" class="admin-button danger"><i class="bi bi-trash3"></i> Hapus</button></form>
                     </div>
                     </article>
                 @empty
                     <p class="admin-sub">Belum ada proyek. Tambahkan karya pertama melalui formulir di atas.</p>
+                @endforelse
+            </div>
+        </section>
+        @endif
+
+        @if($section === 'education')
+        <section class="admin-panel dashboard-panel">
+            <div class="panel-heading"><div><span class="panel-kicker">RIWAYAT BELAJAR</span><h2>Pendidikan</h2><p>Isi nama sekolah atau kampus dan tahun. Hanya jenjang yang sudah diisi akan tampil di halaman utama.</p></div></div>
+            <div class="education-admin-list">
+                @foreach($educations as $education)
+                <form class="education-admin-card" action="{{ route('admin.education.update', $education) }}" method="POST">
+                    @csrf @method('PUT')
+                    <div class="education-admin-level"><span class="education-admin-number">{{ str_pad($education->sort_order, 2, '0', STR_PAD_LEFT) }}</span><div><span class="panel-kicker">JENJANG</span><h3>{{ $education->level }}</h3></div></div>
+                    <label>Nama sekolah/kampus<input name="institution" maxlength="255" value="{{ old('institution', $education->institution) }}" placeholder="Contoh: SD Negeri 01"></label>
+                    <label>Tahun mulai<input name="start_year" type="number" min="1900" max="2100" value="{{ old('start_year', $education->start_year) }}" placeholder="2010"></label>
+                    <label>Tahun selesai<input name="end_year" type="number" min="1900" max="2100" value="{{ old('end_year', $education->end_year) }}" placeholder="2016"></label>
+                    <label class="wide">Keterangan (opsional)<textarea name="description" rows="2" maxlength="500" placeholder="Jurusan, fokus, atau pencapaian">{{ old('description', $education->description) }}</textarea></label>
+                    <button class="admin-button" type="submit"><i class="bi bi-check2"></i> Simpan {{ $education->level }}</button>
+                </form>
+                @endforeach
+            </div>
+        </section>
+        @endif
+
+        @if($section === 'news')
+        <section class="admin-panel dashboard-panel">
+            <div class="panel-heading"><div><span class="panel-kicker">PUBLIKASI</span><h2>Berita & artikel</h2><p>Kelola tulisan yang tampil di halaman utama dan arsip berita.</p></div><div class="news-admin-counts"><span><strong>{{ $newsArticles->whereNotNull('published_at')->count() }}</strong> Terbit</span><span><strong>{{ $newsArticles->whereNull('published_at')->count() }}</strong> Draft</span></div></div>
+            <details class="news-create-panel">
+                <summary><span class="news-create-icon"><i class="bi bi-pencil-square"></i></span><span><strong>Tulis berita baru</strong><small>Tambahkan tulisan, gambar, dan atur status publikasi.</small></span><i class="bi bi-plus-lg"></i></summary>
+            <form class="admin-form news-create-form" action="{{ route('admin.news.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <label>Judul<input name="title" required maxlength="255" placeholder="Judul berita"></label>
+                <label class="wide">Ringkasan<textarea name="excerpt" rows="2" required maxlength="500" placeholder="Ringkasan singkat untuk kartu berita"></textarea></label>
+                <label class="wide">Isi berita<textarea name="content" rows="8" required maxlength="30000" placeholder="Tulis isi berita di sini..."></textarea></label>
+                <label>Gambar (opsional)<input type="file" name="image" accept="image/jpeg,image/png,image/webp"></label>
+                <label class="news-publish-option"><input type="hidden" name="is_published" value="0"><input type="checkbox" name="is_published" value="1"> Terbitkan sekarang</label>
+                <button class="admin-button" type="submit"><i class="bi bi-plus-lg"></i> Simpan berita</button>
+            </form>
+            </details>
+            <div class="news-admin-list">
+                @forelse($newsArticles as $article)
+                <details class="news-admin-entry">
+                    <summary><span class="news-admin-thumb">@if($article->image)<img src="{{ asset('storage/'.$article->image) }}" alt="">@else<i class="bi bi-image"></i>@endif</span><span class="news-admin-summary"><span class="news-admin-status {{ $article->published_at ? 'published' : 'draft' }}"><i class="bi {{ $article->published_at ? 'bi-globe2' : 'bi-file-earmark' }}"></i> {{ $article->published_at ? 'Terbit' : 'Draft' }}</span><strong class="news-admin-title">{{ $article->title }}</strong><small>{{ $article->excerpt }}</small></span><span class="news-admin-date">{{ $article->published_at?->format('d M Y') ?: 'Belum diterbitkan' }}</span><i class="bi bi-chevron-down"></i></summary>
+                    <form class="admin-form news-edit-form" action="{{ route('admin.news.update', $article) }}" method="POST" enctype="multipart/form-data">
+                        @csrf @method('PUT')
+                        <label>Judul<input name="title" required maxlength="255" value="{{ $article->title }}"></label>
+                        <label class="wide">Ringkasan<textarea name="excerpt" rows="2" required maxlength="500">{{ $article->excerpt }}</textarea></label>
+                        <label class="wide">Isi berita<textarea name="content" rows="8" required maxlength="30000">{{ $article->content }}</textarea></label>
+                        <label>Ganti gambar<input type="file" name="image" accept="image/jpeg,image/png,image/webp">@if($article->image)<small>Gambar saat ini tersedia.</small>@endif</label>
+                        <label class="news-publish-option"><input type="hidden" name="is_published" value="0"><input type="checkbox" name="is_published" value="1" @checked($article->published_at)> Terbitkan</label>
+                        <button class="admin-button" type="submit"><i class="bi bi-check2"></i> Simpan perubahan</button>
+                    </form>
+                    <div class="news-admin-actions">@if($article->published_at)<a href="{{ route('news.show', $article) }}" target="_blank" rel="noreferrer">Lihat artikel <i class="bi bi-arrow-up-right"></i></a>@else<span class="admin-sub">Terbitkan artikel untuk melihat halaman publik.</span>@endif<form action="{{ route('admin.news.delete', $article) }}" method="POST" data-confirm="Hapus berita ini? Tindakan ini tidak dapat dibatalkan.">@csrf @method('DELETE')<button class="admin-button danger" type="submit"><i class="bi bi-trash3"></i> Hapus</button></form></div>
+                </details>
+                @empty
+                    <p class="admin-sub">Belum ada berita. Tambahkan berita pertama melalui formulir di atas.</p>
                 @endforelse
             </div>
         </section>
@@ -181,7 +250,60 @@
             <form action="{{ route('admin.cv.upload') }}" method="POST" enctype="multipart/form-data" class="cv-upload-form">@csrf<label class="cv-file-input"><i class="bi bi-file-earmark-pdf"></i><span><strong>Pilih file CV dalam format PDF</strong><small>Ukuran maksimal 10 MB. Unggahan baru menggantikan file lama.</small></span><input type="file" name="cv" accept="application/pdf,.pdf" required></label><button class="admin-button" type="submit"><i class="bi bi-cloud-arrow-up"></i> {{ $cvPath ? 'Perbarui CV' : 'Unggah CV' }}</button></form>
         </section>
         @endif
-        <footer class="dashboard-footer">Nadhim Alim · Ruang pengelolaan portofolio</footer>
+
+        @if($section === 'account')
+        <section class="admin-panel dashboard-panel"><div class="panel-heading"><div><span class="panel-kicker">AKUN PENGELOLA</span><h2>Profil admin</h2><p>Atur nama dan foto yang tampil di sidebar, serta perbarui kata sandi masuk.</p></div></div>
+            <div class="account-settings-grid"><form class="admin-form account-form" action="{{ route('admin.account.profile.update') }}" method="POST" enctype="multipart/form-data">@csrf @method('PUT')
+                <div class="account-photo-preview">@if($adminProfile['photo'])<img src="{{ asset('storage/'.$adminProfile['photo']) }}" alt="Foto admin">@else<i class="bi bi-person"></i>@endif</div>
+                <label>Nama admin<input name="name" required maxlength="120" value="{{ old('name', $adminProfile['name']) }}"></label>
+                <label>Foto admin<input type="file" name="photo" accept="image/jpeg,image/png,image/webp"><small>Opsional · JPG, PNG, atau WebP · maks. 5 MB.</small></label>
+                <label>Nomor WhatsApp admin<input type="tel" name="whatsapp" inputmode="tel" maxlength="30" value="{{ old('whatsapp', $adminProfile['whatsapp']) }}" placeholder="6281234567890"><small>Gunakan kode negara, misalnya 6281234567890. Dipakai untuk tombol konsultasi.</small></label>
+                <button class="admin-button" type="submit"><i class="bi bi-check2"></i> Simpan profil</button>
+            </form>
+            <form class="admin-form account-form" action="{{ route('admin.account.password.update') }}" method="POST">@csrf @method('PUT')
+                <h3><i class="bi bi-shield-lock"></i> Ubah kata sandi</h3>
+                <label>Kata sandi saat ini<input type="password" name="current_password" autocomplete="current-password" required></label>
+                <label>Kata sandi baru<input type="password" name="new_password" autocomplete="new-password" minlength="10" required><small>Minimal 10 karakter.</small></label>
+                <label>Ulangi kata sandi baru<input type="password" name="new_password_confirmation" autocomplete="new-password" minlength="10" required></label>
+                <button class="admin-button" type="submit"><i class="bi bi-key"></i> Perbarui kata sandi</button>
+            </form></div>
+        </section>
+        @endif
+
+        @if($section === 'schedule')
+        <section class="admin-panel dashboard-panel"><div class="panel-heading"><div><span class="panel-kicker">PERENCANAAN KERJA</span><h2>Jadwal proyek pribadi</h2><p>Catat agenda, deadline, progres pekerjaan, dan pembayaran proyek.</p></div><div class="schedule-heading-actions"><span class="panel-count">{{ $workTasks->count() }} agenda</span><a class="admin-button" href="{{ route('admin.work-tasks.export') }}"><i class="bi bi-file-earmark-spreadsheet"></i> Ekspor CSV</a></div></div>
+            <div class="schedule-finance-grid"><article><span>Total nilai proyek</span><strong>Rp {{ number_format($workTasks->sum('project_value'), 0, ',', '.') }}</strong></article><article><span>Sudah dibayar</span><strong>Rp {{ number_format($workTasks->sum('amount_paid'), 0, ',', '.') }}</strong></article><article><span>Sisa pembayaran</span><strong>Rp {{ number_format($workTasks->sum(fn($task) => max(0, (float)$task->project_value - (float)$task->amount_paid)), 0, ',', '.') }}</strong></article></div>
+            @if($overdueDeadlineCount || $nearDeadlineCount)<div class="deadline-alerts">@if($overdueDeadlineCount)<div class="deadline-alert overdue"><i class="bi bi-exclamation-octagon"></i><span><strong>{{ $overdueDeadlineCount }} deadline terlambat</strong><small>Periksa agenda yang sudah melewati tenggat.</small></span></div>@endif @if($nearDeadlineCount)<div class="deadline-alert soon"><i class="bi bi-alarm"></i><span><strong>{{ $nearDeadlineCount }} deadline dalam 3 hari</strong><small>Pastikan pekerjaan yang mendekati tenggat terjadwal.</small></span></div>@endif</div>@endif
+            <div class="work-calendar" data-calendar><div class="calendar-toolbar"><div><span class="panel-kicker">KALENDER KERJA</span><h3 data-calendar-title></h3></div><div class="calendar-controls"><button type="button" data-calendar-prev aria-label="Periode sebelumnya"><i class="bi bi-chevron-left"></i></button><button type="button" data-calendar-today>Hari ini</button><button type="button" data-calendar-next aria-label="Periode berikutnya"><i class="bi bi-chevron-right"></i></button><div class="calendar-view-toggle"><button type="button" data-calendar-view="month" class="active">Bulan</button><button type="button" data-calendar-view="week">Minggu</button></div></div></div><div class="calendar-weekdays"><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span></div><div class="calendar-grid" data-calendar-grid></div><div class="calendar-legend"><span><i class="schedule-dot"></i> Jadwal</span><span><i class="deadline-dot"></i> Deadline</span><span><i class="overdue-dot"></i> Terlambat</span></div></div>
+            <div class="calendar-source" aria-hidden="true">@foreach($workTasks as $task)<span data-title="{{ $task->title }}" data-start="{{ $task->scheduled_at->toDateString() }}" data-start-time="{{ $task->scheduled_at->format('H:i') }}" data-deadline="{{ $task->deadline_at?->toDateString() }}" data-status="{{ $task->status }}"></span>@endforeach</div>
+            <form class="admin-form schedule-create-form" action="{{ route('admin.work-tasks.store') }}" method="POST">@csrf
+                <label>Nama pekerjaan<input name="title" required maxlength="255" placeholder="Contoh: Membuat landing page"></label><label>Klien / proyek<input name="client" maxlength="255" placeholder="Opsional"></label>
+                <label>Jadwal mulai<input type="datetime-local" name="scheduled_at" required value="{{ now()->format('Y-m-d\TH:i') }}"></label><label>Deadline (opsional)<input type="datetime-local" name="deadline_at"></label>
+                <label>Prioritas<select name="priority"><option value="normal">Normal</option><option value="high">Tinggi</option><option value="low">Rendah</option></select></label><label>Status<select name="status"><option value="planned">Terencana</option><option value="in_progress">Sedang dikerjakan</option><option value="done">Selesai</option></select></label>
+                <label>Nilai proyek (Rp)<input type="number" name="project_value" min="0" step="1000" value="0"></label><label>Sudah dibayar (Rp)<input type="number" name="amount_paid" min="0" step="1000" value="0"></label><label>Status pembayaran<select name="payment_status"><option value="unpaid">Belum dibayar</option><option value="partial">Dibayar sebagian</option><option value="paid">Lunas</option></select></label>
+                <label class="wide">Catatan<textarea name="description" rows="2" maxlength="3000" placeholder="Rincian atau catatan pekerjaan"></textarea></label><button class="admin-button" type="submit"><i class="bi bi-plus-lg"></i> Tambahkan jadwal</button>
+            </form>
+            <label class="admin-search"><i class="bi bi-search"></i><input type="search" data-admin-search="tasks" placeholder="Cari agenda, klien, atau catatan..."></label><p class="admin-sub search-empty" data-search-empty="tasks" hidden>Tidak ada agenda yang cocok.</p><div class="work-task-list">@forelse($workTasks as $task)<details class="work-task-card" data-search-item="tasks"><summary><span class="work-task-date"><strong>{{ $task->scheduled_at->format('d') }}</strong><small>{{ $task->scheduled_at->format('M Y') }}</small></span><span class="work-task-summary"><strong>{{ $task->title }}</strong><small>{{ $task->client ?: 'Proyek pribadi' }} · {{ $task->scheduled_at->format('H:i') }}@if($task->deadline_at) · Deadline {{ $task->deadline_at->format('d M Y') }}@endif</small></span><span class="task-state {{ $task->status }}">{{ ['planned' => 'Terencana', 'in_progress' => 'Dikerjakan', 'done' => 'Selesai'][$task->status] }}</span><i class="bi bi-chevron-down"></i></summary>
+                <form class="admin-form work-task-edit" action="{{ route('admin.work-tasks.update', $task) }}" method="POST">@csrf @method('PUT')<label>Nama pekerjaan<input name="title" required maxlength="255" value="{{ $task->title }}"></label><label>Klien / proyek<input name="client" maxlength="255" value="{{ $task->client }}"></label><label>Jadwal mulai<input type="datetime-local" name="scheduled_at" required value="{{ $task->scheduled_at->format('Y-m-d\TH:i') }}"></label><label>Deadline<input type="datetime-local" name="deadline_at" value="{{ $task->deadline_at?->format('Y-m-d\TH:i') }}"></label><label>Prioritas<select name="priority"><option value="low" @selected($task->priority==='low')>Rendah</option><option value="normal" @selected($task->priority==='normal')>Normal</option><option value="high" @selected($task->priority==='high')>Tinggi</option></select></label><label>Status<select name="status"><option value="planned" @selected($task->status==='planned')>Terencana</option><option value="in_progress" @selected($task->status==='in_progress')>Sedang dikerjakan</option><option value="done" @selected($task->status==='done')>Selesai</option></select></label><label class="wide">Rincian pekerjaan<textarea name="description" rows="2" maxlength="3000">{{ $task->description }}</textarea></label><label>Nilai proyek (Rp)<input type="number" name="project_value" min="0" step="1000" value="{{ $task->project_value }}"></label><label>Sudah dibayar (Rp)<input type="number" name="amount_paid" min="0" step="1000" value="{{ $task->amount_paid }}"></label><label>Status pembayaran<select name="payment_status"><option value="unpaid" @selected($task->payment_status==='unpaid')>Belum dibayar</option><option value="partial" @selected($task->payment_status==='partial')>Dibayar sebagian</option><option value="paid" @selected($task->payment_status==='paid')>Lunas</option></select></label><label class="wide">Catatan progres<textarea name="progress_notes" rows="4" maxlength="5000" placeholder="Catat pekerjaan yang sudah selesai dan langkah berikutnya">{{ $task->progress_notes }}</textarea></label><button class="admin-button" type="submit"><i class="bi bi-check2"></i> Simpan perubahan</button></form>
+                @php($availablePaymentAmount = max(0, (int)$task->project_value - (int)$task->amount_paid - (int)$task->payments->whereIn('status', ['pending','challenge'])->sum('gross_amount')))<div class="task-payments"><div class="task-payments-heading"><strong><i class="bi bi-credit-card-2-front"></i> Tagihan online</strong><span>Midtrans</span></div>
+                    @if($task->payments->isNotEmpty())<div class="payment-link-list">@foreach($task->payments->sortByDesc('created_at') as $payment)<div class="payment-link-row"><span><strong>Rp {{ number_format($payment->gross_amount, 0, ',', '.') }}</strong><small>{{ $payment->customer_name }} · {{ ['pending'=>'Menunggu pembayaran','paid'=>'Lunas','denied'=>'Ditolak','cancelled'=>'Dibatalkan','expired'=>'Kedaluwarsa','challenge'=>'Perlu verifikasi'][$payment->status] ?? ucfirst($payment->status) }}</small></span><button class="admin-button payment-copy" type="button" data-copy="{{ route('payments.show', $payment->public_token) }}" @disabled(!$payment->snap_token)><i class="bi bi-link-45deg"></i> Salin link</button></div>@endforeach</div>@endif
+                    @if($midtransConfigured && $availablePaymentAmount >= 1000)<form class="admin-form payment-create-form" action="{{ route('admin.work-tasks.payment-links.store', $task) }}" method="POST">@csrf<label>Nama klien<input name="customer_name" required maxlength="120" placeholder="Nama penerima tagihan"></label><label>Email (opsional)<input type="email" name="customer_email" maxlength="190" placeholder="nama@email.com"></label><label>Nominal tagihan (Rp)<input type="number" name="amount" required min="1000" step="1000" max="{{ $availablePaymentAmount }}" value="{{ $availablePaymentAmount }}"></label><button class="admin-button" type="submit"><i class="bi bi-plus-circle"></i> Buat tagihan</button></form>@elseif(!$midtransConfigured)<p class="payment-gateway-note"><i class="bi bi-info-circle"></i> Isi MIDTRANS_SERVER_KEY dan MIDTRANS_CLIENT_KEY di .env untuk mengaktifkan pembayaran online.</p>@else<p class="payment-gateway-note"><i class="bi bi-check-circle"></i> Sisa proyek sudah tertagih atau lunas.</p>@endif
+                </div>
+                <form action="{{ route('admin.work-tasks.delete', $task) }}" method="POST" data-confirm="Hapus jadwal ini? Tindakan ini tidak dapat dibatalkan.">@csrf @method('DELETE')<button class="admin-button danger" type="submit"><i class="bi bi-trash3"></i> Hapus jadwal</button></form></details>@empty<p class="admin-sub">Belum ada jadwal. Gunakan formulir di atas untuk merencanakan pekerjaan pertama.</p>@endforelse</div>
+        </section>
+        @endif
+        @if($section === 'data-backup')
+        <section class="admin-panel dashboard-panel backup-panel">
+            <div class="backup-hero"><span class="backup-hero-icon"><i class="bi bi-shield-check"></i></span><div><span class="panel-kicker">PUSAT KEAMANAN DATA</span><h2>Backup & pemulihan</h2><p>Siapkan salinan data sebelum terjadi gangguan. Arsip dapat dipulihkan setelah aplikasi dan database kembali aktif.</p></div></div>
+            <div class="backup-offsite-note"><i class="bi bi-cloud-check"></i><div><strong>Simpan salinan di luar server</strong><p>Setelah mengunduh file ZIP, salin ke Google Drive, penyimpanan cloud lain, atau hard disk eksternal. Jika server mati, halaman ini ikut tidak bisa diakses; salinan di luar server yang dapat digunakan untuk pemulihan.</p></div></div>
+            <div class="backup-inventory"><div class="backup-inventory-heading"><span class="panel-kicker">ISI YANG AKAN DICADANGKAN</span><small>Dibuat langsung saat Anda mengunduh</small></div><div class="backup-inventory-grid"><article><i class="bi bi-images"></i><strong>{{ $projects->count() }}</strong><span>Proyek</span></article><article><i class="bi bi-newspaper"></i><strong>{{ $newsArticles->count() }}</strong><span>Berita</span></article><article><i class="bi bi-calendar-week"></i><strong>{{ $workTasks->count() }}</strong><span>Agenda kerja</span></article><article><i class="bi bi-credit-card"></i><strong>{{ $workTasks->sum(fn($task) => $task->payments->count()) }}</strong><span>Tagihan</span></article><article><i class="bi bi-image"></i><strong>{{ $projects->whereNotNull('image')->count() + $newsArticles->whereNotNull('image')->count() }}</strong><span>Gambar terkait</span></article></div></div>
+            <div class="backup-steps"><article><span>01</span><div><strong>Unduh arsip</strong><small>Buat ZIP berisi data dan gambar.</small></div></article><article><span>02</span><div><strong>Simpan di tempat aman</strong><small>Pisahkan salinan dari server ini.</small></div></article><article><span>03</span><div><strong>Pulihkan saat dibutuhkan</strong><small>Unggah ZIP setelah aplikasi aktif.</small></div></article></div>
+            <div class="backup-action-grid"><article class="backup-download-card"><span class="backup-action-icon"><i class="bi bi-cloud-arrow-down"></i></span><div><h3>Unduh backup sekarang</h3><p>Arsip ZIP menyertakan proyek, berita, agenda, riwayat pembayaran, dan gambar yang tersimpan. Simpan file hasil unduhan di luar server.</p><a class="admin-button" href="{{ route('admin.backup.download') }}"><i class="bi bi-download"></i> Buat & unduh backup</a></div></article>
+                <article class="backup-restore-card"><span class="backup-action-icon"><i class="bi bi-arrow-counterclockwise"></i></span><div><h3>Pulihkan dari backup</h3><p>Pilih arsip ZIP yang pernah diunduh. Sistem memeriksa format dan menambahkan data yang belum ada.</p><form action="{{ route('admin.backup.restore') }}" method="POST" enctype="multipart/form-data" class="backup-restore-form">@csrf<label>Pilih arsip backup<input type="file" name="backup" accept=".zip,application/zip" required data-backup-file></label><small class="backup-file-name" data-backup-file-name>Belum ada file dipilih · ZIP maks. 100 MB</small><button class="admin-button" type="submit" data-loading-title="Memeriksa dan memulihkan..." data-loading-description="Memvalidasi file backup lalu menambahkan data yang belum ada."><i class="bi bi-arrow-counterclockwise"></i> Validasi & pulihkan</button></form></div></article>
+            </div>
+            <div class="backup-restore-note"><i class="bi bi-info-circle"></i><span><strong>Pemulihan aman:</strong> data yang sudah ada tidak ditimpa atau dihapus. Duplikat proyek, berita, dan agenda akan dilewati.</span></div>
+        </section>
+        @endif        <footer class="dashboard-footer">Nadhim Alim · Ruang pengelolaan portofolio</footer>
     </main>
 </div>
 <script>
@@ -201,5 +323,115 @@ document.querySelectorAll('[data-photo-preview]').forEach((input) => {
     });
 });
 </script>
+<script>
+document.querySelectorAll('[data-copy]').forEach((button) => button.addEventListener('click', async () => {
+    const original = button.innerHTML;
+    try {
+        await navigator.clipboard.writeText(button.dataset.copy);
+        button.innerHTML = '<i class="bi bi-check2"></i> Tersalin';
+        setTimeout(() => { button.innerHTML = original; }, 1800);
+    } catch {
+        window.prompt('Salin link pembayaran ini:', button.dataset.copy);
+    }
+}));
+(() => {
+    const backupInput = document.querySelector('[data-backup-file]');
+    backupInput?.addEventListener('change', () => {
+        const file = backupInput.files?.[0];
+        const label = document.querySelector('[data-backup-file-name]');
+        if (label) label.textContent = file ? `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB` : 'Belum ada file dipilih · ZIP maks. 100 MB';
+    });
+    document.querySelectorAll('[data-admin-search]').forEach((input) => {
+        const group = input.dataset.adminSearch;
+        const items = [...document.querySelectorAll(`[data-search-item="${group}"]`)];
+        const empty = document.querySelector(`[data-search-empty="${group}"]`);
+        input.addEventListener('input', () => {
+            const query = input.value.trim().toLocaleLowerCase('id');
+            let visible = 0;
+            items.forEach((item) => {
+                const match = item.textContent.toLocaleLowerCase('id').includes(query);
+                item.hidden = !match;
+                if (match) visible++;
+            });
+            if (empty) empty.hidden = visible > 0 || query.length === 0;
+        });
+    });
+    const clock = document.querySelector('[data-live-clock]');
+    const dateLabel = document.querySelector('[data-live-date]');
+    const calendarGrid = document.querySelector('[data-overview-calendar]');
+    if (clock && dateLabel) {
+        const updateClock = () => {
+            const now = new Date();
+            clock.textContent = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(now);
+            dateLabel.textContent = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(now);
+        };
+        updateClock(); window.setInterval(updateClock, 1000);
+    }
+    if (calendarGrid) {
+        const tasks = new Set([...document.querySelectorAll('.overview-calendar-source [data-date]')].map((item) => item.dataset.date));
+        const monthTitle = document.querySelector('[data-overview-month]');
+        const current = new Date();
+        let viewedMonth = new Date(current.getFullYear(), current.getMonth(), 1);
+        const keyFor = (date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        const renderCalendar = () => {
+            monthTitle.textContent = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(viewedMonth);
+            calendarGrid.replaceChildren();
+            ['Sen','Sel','Rab','Kam','Jum','Sab','Min'].forEach((day) => { const item=document.createElement('span'); item.className='overview-weekday'; item.textContent=day; calendarGrid.append(item); });
+            const first = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth(), 1);
+            const offset = (first.getDay()+6)%7;
+            const days = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth()+1, 0).getDate();
+            for(let blank=0; blank<offset; blank++){ const empty=document.createElement('span'); empty.className='overview-calendar-day blank'; calendarGrid.append(empty); }
+            for(let day=1; day<=days; day++){
+                const date = new Date(viewedMonth.getFullYear(), viewedMonth.getMonth(), day);
+                const item=document.createElement('span'); item.className=`overview-calendar-day${keyFor(date)===keyFor(current)?' today':''}${tasks.has(keyFor(date))?' has-task':''}`; item.textContent=day; calendarGrid.append(item);
+            }
+        };
+        document.querySelector('[data-overview-prev]')?.addEventListener('click',()=>{viewedMonth.setMonth(viewedMonth.getMonth()-1);renderCalendar();});
+        document.querySelector('[data-overview-next]')?.addEventListener('click',()=>{viewedMonth.setMonth(viewedMonth.getMonth()+1);renderCalendar();});
+        renderCalendar();
+    }
+})();
+(() => {
+    const calendar = document.querySelector('[data-calendar]');
+    if (!calendar) return;
+    const grid = calendar.querySelector('[data-calendar-grid]');
+    const title = calendar.querySelector('[data-calendar-title]');
+    const tasks = [...document.querySelectorAll('.calendar-source span')].map((item) => ({
+        title: item.dataset.title, start: item.dataset.start, time: item.dataset.startTime,
+        deadline: item.dataset.deadline, status: item.dataset.status,
+    }));
+    let current = new Date();
+    let mode = 'month';
+    const dateKey = (date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    const monday = (date) => { const copy = new Date(date.getFullYear(), date.getMonth(), date.getDate()); copy.setDate(copy.getDate() - ((copy.getDay()+6)%7)); return copy; };
+    const todayKey = dateKey(new Date());
+    const render = () => {
+        const start = mode === 'month' ? monday(new Date(current.getFullYear(), current.getMonth(), 1)) : monday(current);
+        const count = mode === 'month' ? 42 : 7;
+        const end = new Date(start); end.setDate(end.getDate()+count-1);
+        const formatter = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' });
+        title.textContent = mode === 'month' ? formatter.format(current) : `${start.getDate()} ${new Intl.DateTimeFormat('id-ID',{month:'short'}).format(start)} – ${end.getDate()} ${formatter.format(end)}`;
+        grid.replaceChildren();
+        for (let offset=0; offset<count; offset++) {
+            const date = new Date(start); date.setDate(start.getDate()+offset);
+            const key = dateKey(date);
+            const cell = document.createElement('div');
+            cell.className = `calendar-day${key===todayKey?' today':''}${mode==='month'&&date.getMonth()!==current.getMonth()?' outside':''}`;
+            const number = document.createElement('span'); number.className='calendar-day-number'; number.textContent=date.getDate(); cell.append(number);
+            tasks.forEach((task) => {
+                if (task.start === key) { const event=document.createElement('span'); event.className=`calendar-event schedule-event ${task.status}`; event.textContent=`${task.time} ${task.title}`; event.title=`Jadwal: ${task.title}`; cell.append(event); }
+                if (task.deadline === key && task.status !== 'done') { const event=document.createElement('span'); const delta=Math.floor((new Date(`${key}T00:00:00`)-new Date(`${todayKey}T00:00:00`))/86400000); event.className=`calendar-event deadline-event${delta<0?' overdue':delta<=3?' soon':''}`; event.textContent=`Tenggat · ${task.title}`; event.title=`Deadline: ${task.title}`; cell.append(event); }
+            });
+            grid.append(cell);
+        }
+    };
+    calendar.querySelector('[data-calendar-prev]').addEventListener('click',()=>{ if(mode==='month') current.setMonth(current.getMonth()-1); else current.setDate(current.getDate()-7); render(); });
+    calendar.querySelector('[data-calendar-next]').addEventListener('click',()=>{ if(mode==='month') current.setMonth(current.getMonth()+1); else current.setDate(current.getDate()+7); render(); });
+    calendar.querySelector('[data-calendar-today]').addEventListener('click',()=>{ current=new Date(); render(); });
+    calendar.querySelectorAll('[data-calendar-view]').forEach((button)=>button.addEventListener('click',()=>{ mode=button.dataset.calendarView; calendar.querySelectorAll('[data-calendar-view]').forEach((item)=>item.classList.toggle('active',item===button)); render(); }));
+    render();
+})();
+</script>
+<script src="{{ asset('js/feedback.js') }}" defer></script>
 </body>
 </html>

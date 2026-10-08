@@ -14,10 +14,10 @@
                     <p>{{ $service->description }}</p>
                     <div class="service-price-label">Harga mulai dari</div>
                     <div class="service-price">Rp {{ number_format($service->starting_price, 0, ',', '.') }}</div>
-                    <a href="#kontak" class="service-cta">Konsultasikan paket <i class="bi bi-arrow-up-right"></i></a>
+                    <button type="button" class="service-cta" data-consultation-open data-package="{{ $service->title }}">Konsultasikan paket <i class="bi bi-arrow-up-right"></i></button>
                 </article>
             @empty
-                <div class="empty-project"><h3>Paket layanan segera hadir</h3><p>Hubungi saya untuk mendiskusikan kebutuhan digital Anda.</p></div>
+                <div class="empty-project"><h3>Paket layanan segera hadir</h3><p>Hubungi saya untuk mendiskusikan kebutuhan digital Anda.</p><button type="button" class="service-cta" data-consultation-open>Konsultasi kebutuhan <i class="bi bi-arrow-up-right"></i></button></div>
             @endforelse
         </div>
     </div>
